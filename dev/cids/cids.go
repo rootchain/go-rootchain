@@ -53,7 +53,7 @@ func Register(codecs map[string]uint64, codecToStr map[uint64]string) {
 
 // Register codecs in `go-cid` package to inject IPFN codec types into IPFS.
 //
-// 	import _ "github.com/ipfn/ipfn/go/cids"
+// 	import _ "github.com/rootchain/go-rootchain/dev/cids"
 //
 // 	// optionally
 // 	func init() {

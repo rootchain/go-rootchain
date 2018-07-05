@@ -24,16 +24,16 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	base32check "github.com/ipfn/go-base32check"
-	"github.com/ipfn/ipfn/go/opcode"
+	"github.com/ipfn/go-ipfn-cells"
 )
 
 // Address - Short address with extra checksum.
 type Address struct {
 	// ID - Cell id.
-	ID opcode.ID `json:"id,omitempty"`
+	ID cells.ID `json:"id,omitempty"`
 
 	// CID - Content ID.
-	CID *opcode.CID `json:"cid,omitempty"`
+	CID *cells.CID `json:"cid,omitempty"`
 
 	// Extra - Extra checksum.
 	Extra uint16 `json:"extra,omitempty"`
@@ -72,14 +72,14 @@ func ToBytes(src string) (body []byte, err error) {
 }
 
 // FromCID - Creates address from content identifier.
-func FromCID(c *opcode.CID) (addr *Address) {
+func FromCID(c *cells.CID) (addr *Address) {
 	addr = new(Address)
 	addr.SetCID(c)
 	return
 }
 
 // CidToShort - Creates short address from content identifier.
-func CidToShort(c *opcode.CID) (addr *Address) {
+func CidToShort(c *cells.CID) (addr *Address) {
 	addr = new(Address)
 	addr.SetBytes(c.Bytes())
 	return
@@ -101,9 +101,9 @@ func (addr *Address) String() string {
 }
 
 // SetCID - Sets address from cid.
-func (addr *Address) SetCID(c *opcode.CID) {
+func (addr *Address) SetCID(c *cells.CID) {
 	bytes := c.Bytes()
-	addr.ID = opcode.NewID(bytes)
+	addr.ID = cells.NewID(bytes)
 	addr.Extra = uint16(math.Ceil(math.Sqrt(float64(uint64(addr.ID) % uint64(crc32.ChecksumIEEE(bytes))))))
 	addr.CID = c
 	return
@@ -111,7 +111,7 @@ func (addr *Address) SetCID(c *opcode.CID) {
 
 // SetBytes - Sets address from bytes.
 func (addr *Address) SetBytes(bytes []byte) {
-	addr.ID = opcode.NewID(bytes)
+	addr.ID = cells.NewID(bytes)
 	addr.Extra = uint16(math.Ceil(math.Sqrt(float64(uint64(addr.ID) % uint64(crc32.ChecksumIEEE(bytes))))))
 }
 
@@ -134,7 +134,7 @@ func (addr *Address) Unmarshal(body []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	addr.ID = opcode.ID(id)
+	addr.ID = cells.ID(id)
 	checksum, err := buff.DecodeVarint()
 	if err != nil {
 		return err
@@ -176,7 +176,7 @@ func (addr *Address) UnmarshalString(body string) (err error) {
 		if err != nil {
 			return err
 		}
-		addr.SetCID(opcode.WrapCID(c))
+		addr.SetCID(cells.WrapCID(c))
 		return nil
 	}
 	if body[0] != 'b' {

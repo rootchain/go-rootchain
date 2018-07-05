@@ -22,12 +22,12 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/spf13/cobra"
 
+	"github.com/ipfn/go-ipfn-cells"
+	"github.com/ipfn/go-ipfn-cells/chainops"
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
-	"github.com/ipfn/ipfn/go/chain"
-	"github.com/ipfn/ipfn/go/opcode"
-	"github.com/ipfn/ipfn/go/opcode/chainops"
-	"github.com/ipfn/ipfn/go/wallet"
+	"github.com/ipfn/go-ipfn-wallet"
+	"github.com/rootchain/go-rootchain/chain"
 )
 
 var (
@@ -61,13 +61,13 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 	var (
 		privKeys []*btcec.PrivateKey
 
-		assignOps   []*opcode.BinaryCell
-		delegateOps []*opcode.BinaryCell
+		assignOps   []*cells.BinaryCell
+		delegateOps []*cells.BinaryCell
 	)
 
 	passwords := make(map[string][]byte)
 
-	var nonce opcode.ID
+	var nonce cells.ID
 	for _, keyPath := range keyPaths {
 
 		split := strings.Split(keyPath, ":")
@@ -134,7 +134,7 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 		if err != nil {
 			return err
 		}
-		c, err := opcode.DecodeCID(split[0])
+		c, err := cells.DecodeCID(split[0])
 		if err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 		nonce++
 	}
 
-	ops := opcode.Ops(chainops.Genesis())
+	ops := cells.Ops(chainops.Genesis())
 	ops = append(ops, assignOps...)
 	ops = append(ops, delegateOps...)
 

@@ -19,9 +19,9 @@ import (
 
 	"github.com/ipfn/go-base32check"
 
-	"github.com/rootchain/go-rootchain/cells"
-	"github.com/rootchain/go-rootchain/cells/chainops"
-	"github.com/rootchain/go-rootchain/cells/synaptic"
+	"github.com/ipfn/go-ipfn-cells"
+	"github.com/ipfn/go-ipfn-cells/chainops"
+	"github.com/ipfn/go-ipfn-cells/synaptic"
 	"github.com/stretchr/testify/assert"
 )
 

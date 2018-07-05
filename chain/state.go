@@ -19,9 +19,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ipfn/go-ipfn-cells"
+	"github.com/ipfn/go-ipfn-cells/chainops"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
-	"github.com/rootchain/go-rootchain/cells"
-	"github.com/rootchain/go-rootchain/cells/chainops"
 
 	"github.com/btcsuite/btcd/btcec"
 )

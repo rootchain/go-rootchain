@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rootchain/go-rootchain/cells"
+	"github.com/ipfn/go-ipfn-cells"
 )
 
 // Header - State header structure.

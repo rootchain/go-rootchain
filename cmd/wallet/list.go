@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
-	"github.com/ipfn/ipfn/go/wallet"
+	"github.com/ipfn/go-ipfn-wallet"
 )
 
 func init() {

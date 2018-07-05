@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
-	"github.com/ipfn/ipfn/go/dev/coreapi"
+	"github.com/rootchain/go-rootchain/dev/coreapi"
 )
 
 // RootCmd - Root exp RootCmd.

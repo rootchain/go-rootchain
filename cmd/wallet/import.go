@@ -22,8 +22,8 @@ import (
 
 	bip39 "github.com/ipfn/go-bip39"
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
-	"github.com/ipfn/ipfn/go/keypair"
-	"github.com/ipfn/ipfn/go/wallet"
+	"github.com/ipfn/go-ipfn-keypair"
+	"github.com/ipfn/go-ipfn-wallet"
 )
 
 var (

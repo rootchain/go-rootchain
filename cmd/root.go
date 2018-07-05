@@ -25,13 +25,13 @@ import (
 
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 
-	"github.com/ipfn/ipfn/go/cmd/account"
-	"github.com/ipfn/ipfn/go/cmd/chain"
-	"github.com/ipfn/ipfn/go/cmd/config"
-	"github.com/ipfn/ipfn/go/cmd/core"
-	"github.com/ipfn/ipfn/go/cmd/daemon"
-	"github.com/ipfn/ipfn/go/cmd/exp"
-	"github.com/ipfn/ipfn/go/cmd/wallet"
+	"github.com/rootchain/go-rootchain/cmd/account"
+	"github.com/rootchain/go-rootchain/cmd/chain"
+	"github.com/rootchain/go-rootchain/cmd/config"
+	"github.com/rootchain/go-rootchain/cmd/core"
+	"github.com/rootchain/go-rootchain/cmd/daemon"
+	"github.com/rootchain/go-rootchain/cmd/exp"
+	"github.com/rootchain/go-rootchain/cmd/wallet"
 )
 
 func init() {
@@ -50,9 +50,9 @@ var cfgFile string
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use: "ipfn commands",
-	Short: `IPFN – Interplanetary Functions
+	Short: `Rootchain – Interplanetary Functions Blockchain
 
-https://github.com/ipfn/go-ipfn`,
+https://github.com/rootchain/go-rootchain`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

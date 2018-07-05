@@ -21,19 +21,19 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/ipfn/ipfn/go/cids"
+	"github.com/rootchain/go-rootchain/dev/cids"
 
 	blocks "gx/ipfs/QmTRCUvZLiir12Qr6MV3HKfKMHX8Nf1Vddn6t2g5nsQSb9/go-block-format"
 	ipld "gx/ipfs/QmWi2BYBL5gJ3CiAiQchg6rn1A8iBsrWy51EYxvHVjFvLb/go-ipld-format"
 	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
 
-	"github.com/ipfn/ipfn/go/opcode"
+	"github.com/ipfn/go-ipfn-cells"
 	"github.com/ipfs/go-ipfs/core/coredag"
 
 	// TODO
-	_ "github.com/ipfn/ipfn/go/cids"
-	_ "github.com/ipfn/ipfn/go/opcode/chainops"
-	_ "github.com/ipfn/ipfn/go/opcode/synaptic"
+	_ "github.com/ipfn/go-ipfn-cells/chainops"
+	_ "github.com/ipfn/go-ipfn-cells/synaptic"
+	_ "github.com/rootchain/go-rootchain/dev/cids"
 )
 
 const formatName = "cell-binary"
@@ -60,7 +60,7 @@ func parseCellDag(r io.Reader, mhType uint64, mhLen int) (nodes []ipld.Node, err
 }
 
 func decodeCell(body []byte) (_ ipld.Node, err error) {
-	cell, err := opcode.UnmarshalCell(body)
+	cell, err := cells.UnmarshalCell(body)
 	if err != nil {
 		return
 	}
@@ -68,12 +68,12 @@ func decodeCell(body []byte) (_ ipld.Node, err error) {
 }
 
 type dagCell struct {
-	*opcode.BinaryCell
+	*cells.BinaryCell
 	body []byte
 }
 
 // func (c *dagCell) MarshalJSON() (_ []byte, err error) {
-// 	return opcode.NewPrinter(c.BinaryCell).MarshalJSON()
+// 	return cells.NewPrinter(c.BinaryCell).MarshalJSON()
 // }
 
 func (c *dagCell) RawData() []byte {

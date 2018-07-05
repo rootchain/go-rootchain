@@ -21,7 +21,7 @@ import (
 
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
-	"github.com/ipfn/ipfn/go/wallet"
+	"github.com/ipfn/go-ipfn-wallet"
 )
 
 var (

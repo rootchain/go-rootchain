@@ -23,8 +23,8 @@ import (
 
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
-	"github.com/ipfn/ipfn/go/keypair"
-	"github.com/ipfn/ipfn/go/wallet"
+	"github.com/ipfn/go-ipfn-keypair"
+	"github.com/ipfn/go-ipfn-wallet"
 )
 
 func init() {

@@ -15,15 +15,15 @@
 package channel
 
 import (
-	"github.com/ipfn/ipfn/go/opcode"
+	"github.com/ipfn/go-ipfn-cells"
 )
 
 // Channel - Chain channel inteface.
 type Channel interface {
 	// Recv - Receives operation from channel.
-	Recv() (*opcode.BinaryCell, error)
+	Recv() (*cells.BinaryCell, error)
 
 	// SendSigned - Signs and sends operation.
 	// Returns index of the message in chain.
-	SendSigned(*opcode.BinaryCell) (opcode.ID, error)
+	SendSigned(*cells.BinaryCell) (cells.ID, error)
 }

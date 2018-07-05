@@ -14,7 +14,7 @@
 
 package accounts
 
-import "github.com/ipfn/ipfn/go/dev/address"
+import "github.com/rootchain/go-rootchain/dev/address"
 
 // Account - Account registered on chain.
 type Account struct {

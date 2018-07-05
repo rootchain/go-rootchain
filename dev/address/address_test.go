@@ -19,7 +19,7 @@ import (
 	"fmt"
 	. "testing"
 
-	"github.com/ipfn/ipfn/go/keypair"
+	"github.com/ipfn/go-ipfn-keypair"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -15,14 +15,14 @@
 package accounts
 
 import (
-	"github.com/ipfn/ipfn/go/opcode"
+	"github.com/ipfn/go-ipfn-cells"
 )
 
 // accountStore - Account store interface.
 type accountStore interface {
 	// // Claim - Returns account claim.
-	// Claim(account opcode.ID) (claim *identity.AccountClaim, err error)
+	// Claim(account cells.ID) (claim *identity.AccountClaim, err error)
 
 	// BalanceOf - Gets balance of an account.
-	BalanceOf(account opcode.ID) (balance uint64, err error)
+	BalanceOf(account cells.ID) (balance uint64, err error)
 }
