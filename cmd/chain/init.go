@@ -51,7 +51,6 @@ See wallet usage for more information on key derivation path.`,
 	Example: `  $ rcx chain init -n mychain -k wallet:1e6:1e6 -k default/x/test:1e6:0
   $ rcx chain init -a zFNScYMGz4wQocWbvHVqS1HcbzNzJB5JK3eAkzF9krbSLZiV8cNr:1`,
 	Annotations: map[string]string{"category": "chain"},
-	Args:        cobra.MinimumNArgs(1),
 	Run:         cmdutil.WrapCommand(HandleInitCmd),
 }
 
