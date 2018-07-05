@@ -38,9 +38,9 @@ func init() {
 var SignCmd = &cobra.Command{
 	Use:   "sign [content]",
 	Short: "Sign with ECDSA",
-	Example: `  $ ipfn wallet sign -w example -xd mnemonic '{"value": "0xd"}'
-  $ ipfn wallet sign -d m/44'/138'/0'/0/0 '{"value": "0xd"}'
-  $ ipfn wallet sign -w example -d m/44'/138'/0'/0/0 '{"value": "0xd"}'`,
+	Example: `  $ rcx wallet sign -w example -xd mnemonic '{"value": "0xd"}'
+  $ rcx wallet sign -d m/44'/138'/0'/0/0 '{"value": "0xd"}'
+  $ rcx wallet sign -w example -d m/44'/138'/0'/0/0 '{"value": "0xd"}'`,
 	Annotations: map[string]string{"category": "wallet"},
 	Args:        cobra.MinimumNArgs(1),
 	Run:         cmdutil.WrapCommand(HandleSignCmd),

@@ -40,7 +40,7 @@ var SignedPrefix = cid.Prefix{
 // StateTriePrefix - State trie CID prefix.
 var StateTriePrefix = cid.Prefix{
 	Version:  1,
-	Codec:    cids.ChainStateTrie,
+	Codec:    cid.EthStateTrie, //cids.ChainStateTrie,
 	MhType:   mh.KECCAK_256,
 	MhLength: 32,
 }

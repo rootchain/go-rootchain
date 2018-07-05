@@ -55,10 +55,10 @@ var DeriveCmd = &cobra.Command{
 Path is defined as: "/<purpose>'/<coin_type>'/<account>'/<change>/<address_index>".
 
 Mnemonic can be used for path by using --hash or -x flag.`,
-	Example: `  $ ipfn wallet derive -xd memo
-  $ ipfn wallet derive -k wallet/x/memo
-  $ ipfn wallet derive -w wallet -xd memo
-  $ ipfn wallet derive -d m/44'/138'/0'/0/0`,
+	Example: `  $ rcx wallet derive -xd memo
+  $ rcx wallet derive -k wallet/x/memo
+  $ rcx wallet derive -w wallet -xd memo
+  $ rcx wallet derive -d m/44'/138'/0'/0/0`,
 	Annotations: map[string]string{"category": "wallet"},
 	Args:        CheckDeriveArgs,
 	Run:         cmdutil.WrapCommand(HandleDeriveCmd),

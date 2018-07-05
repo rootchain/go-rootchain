@@ -21,7 +21,6 @@ import (
 
 	"github.com/ipfn/go-ipfn-cells"
 	"github.com/ipfn/go-ipfn-cells/chainops"
-	"github.com/ipfn/go-ipfn-cmd-util/logger"
 
 	"github.com/btcsuite/btcd/btcec"
 )
@@ -41,10 +40,6 @@ func NewState(index uint64, prevHash *cells.CID, execOps []cells.Cell) (_ *State
 	}
 	opsRoot := cells.Root(execOps)
 	execCID := opsRoot.CID()
-	// execCID, err := opsRoot.CID()
-	// if err != nil {
-	// 	return
-	// }
 	header, err := NewHeader(index, prevHash, execCID)
 	if err != nil {
 		return
@@ -118,7 +113,6 @@ func (state *State) Sign(key *btcec.PrivateKey) (_ cells.Cell, err error) {
 		return
 	}
 	state.sigRoot.AddChild(sigOp)
-	logger.Printf("sigRoot: %#v", cells.NewPrinter(sigOp).String())
 	state.signatures = append(state.signatures, sigOp.Memory())
 	body, err := cells.Marshal(state.sigRoot)
 	if err != nil {
