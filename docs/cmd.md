@@ -2,7 +2,7 @@
 
 Rootchain commands.
 
-## `rcx chain init`
+## `chain init`
 
 ```sh
 $ rcx chain init -h
@@ -23,7 +23,7 @@ Flags:
   -k, --key strings    key path and power in key:power:delegated format
 ```
 
-## `rcx wallet create`
+## `wallet create`
 
 ```sh
 $ rcx wallet create -h
@@ -42,7 +42,7 @@ Flags:
   -p, --print   Print mnemonic
 ```
 
-## `rcx wallet derive`
+## `wallet derive`
 
 ```sh
 $ rcx wallet create -h
@@ -72,7 +72,7 @@ Flags:
   -w, --wallet string        wallet name (default "default")
 ```
 
-## `rcx wallet export`
+## `wallet export`
 
 ```sh
 $ rcx wallet export -h
@@ -87,7 +87,7 @@ Flags:
   -h, --help   help for export
 ```
 
-## `rcx wallet import`
+## `wallet import`
 
 ```sh
 $ rcx wallet import -h
@@ -103,7 +103,7 @@ Flags:
   -k, --key    import key instead of seed (default true)
 ```
 
-## `rcx wallet list`
+## `wallet list`
 
 ```sh
 $ rcx wallet list -h
@@ -116,7 +116,7 @@ Flags:
   -h, --help   help for list
 ```
 
-## `rcx sign`
+## `sign`
 
 ```sh
 $ rcx sign -h
