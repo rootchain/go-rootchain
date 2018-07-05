@@ -1,23 +1,23 @@
-# Chain commands
+# Rootchain commands
 
-IPFN chain commands.
+Rootchain commands.
 
-## `ipfn chain init` - initializes a new chain
+## `rcx chain init` - initializes a new chain
 
 ### Usage
 
 ```sh
-$ ipfn chain init -h
+$ rcx chain init -h
 Initializes a new chain.
 
 See wallet usage for more information on key derivation path.
 
 Usage:
-  ipfn chain init [config] [flags]
+  rcx chain init [config] [flags]
 
 Examples:
-  $ ipfn chain init -n mychain -k wallet:1e6:1e6 -k default/x/test:1e6:0
-  $ ipfn chain init -p zFNScYMGz4wQocWbvHVqS1HcbzNzJB5JK3eAkzF9krbSLZiV8cNr:1
+  $ rcx chain init -n mychain -k wallet:1e6:1e6 -k default/x/test:1e6:0
+  $ rcx chain init -p zFNScYMGz4wQocWbvHVqS1HcbzNzJB5JK3eAkzF9krbSLZiV8cNr:1
 
 Flags:
   -h, --help           help for init
@@ -25,14 +25,14 @@ Flags:
   -a, --addr strings   address and power in addr:power format
 
 Global Flags:
-  -c, --config string   config file (default "~/.ipfn.json")
+  -c, --config string   config file (default "~/.rcx.json")
   -v, --verbose         verbose logs output (stdout/stderr)
 ```
 
 ### Example
 
 ```sh
-$ ipfn chain init \
+$ rcx chain init \
     -k default/x/test:1e6:1e6 \
     -k default/x/test2:1e6:1e6 \
     -k default/x/test3:1e6:0 \

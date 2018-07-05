@@ -61,8 +61,8 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 	var (
 		privKeys []*btcec.PrivateKey
 
-		assignOps   []*cells.BinaryCell
-		delegateOps []*cells.BinaryCell
+		assignOps   []cells.Cell
+		delegateOps []cells.Cell
 	)
 
 	passwords := make(map[string][]byte)

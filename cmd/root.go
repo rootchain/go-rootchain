@@ -25,23 +25,13 @@ import (
 
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 
-	"github.com/rootchain/go-rootchain/cmd/account"
 	"github.com/rootchain/go-rootchain/cmd/chain"
-	"github.com/rootchain/go-rootchain/cmd/config"
-	"github.com/rootchain/go-rootchain/cmd/core"
-	"github.com/rootchain/go-rootchain/cmd/daemon"
-	"github.com/rootchain/go-rootchain/cmd/exp"
 	"github.com/rootchain/go-rootchain/cmd/wallet"
 )
 
 func init() {
-	RootCmd.AddCommand(exp.RootCmd)
-	core.RegisterCommands(RootCmd)
 	RootCmd.AddCommand(chain.RootCmd)
-	RootCmd.AddCommand(account.RootCmd)
 	RootCmd.AddCommand(wallet.RootCmd)
-	RootCmd.AddCommand(config.RootCmd)
-	RootCmd.AddCommand(daemon.RootCmd)
 	RootCmd.PersistentFlags().BoolVarP(&logger.Verbose, "verbose", "v", false, "verbose logs output (stdout/stderr)")
 }
 
@@ -49,10 +39,8 @@ var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use: "ipfn commands",
-	Short: `Rootchain – Interplanetary Functions Blockchain
-
-https://github.com/rootchain/go-rootchain`,
+	Use:   "rcx commands",
+	Short: "Rootchain – Interplanetary Functions Blockchain",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -71,7 +59,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.ipfn.json", "config file")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.rootchain.json", "config file")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -88,9 +76,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".ipfn" (without extension).
+		// Search config in home directory with name ".rootchain" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".ipfn")
+		viper.SetConfigName(".rootchain")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
