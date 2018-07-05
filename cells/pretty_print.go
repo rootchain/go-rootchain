@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package opcode
+package cells
 
 import (
 	"bytes"
@@ -26,16 +26,16 @@ import (
 
 // CellPrinter - Cell pretty printer.
 type CellPrinter struct {
-	*BinaryCell
+	Cell
 }
 
 // NewPrinter - Creates new cell pretty printer.
-func NewPrinter(cell *BinaryCell) *CellPrinter {
-	return &CellPrinter{BinaryCell: cell}
+func NewPrinter(cell Cell) *CellPrinter {
+	return &CellPrinter{Cell: cell}
 }
 
 // NewPrinters - Creates new cell pretty printer.
-func NewPrinters(cells []*BinaryCell) (res []*CellPrinter) {
+func NewPrinters(cells []Cell) (res []*CellPrinter) {
 	for _, cell := range cells {
 		res = append(res, NewPrinter(cell))
 	}
@@ -44,15 +44,15 @@ func NewPrinters(cells []*BinaryCell) (res []*CellPrinter) {
 
 // MarshalJSON - Marshals cell as JSON.
 func (p *CellPrinter) MarshalJSON() (_ []byte, err error) {
-	return prettyPrint(p.BinaryCell), nil
+	return prettyPrint(p.Cell), nil
 }
 
 // String - Prints to string.
 func (p *CellPrinter) String() string {
-	return string(prettyPrint(p.BinaryCell))
+	return string(prettyPrint(p.Cell))
 }
 
-func prettyPrint(cell *BinaryCell) (_ []byte) {
+func prettyPrint(cell Cell) (_ []byte) {
 	buff := bytes.NewBuffer(nil)
 	buff.WriteByte('"')
 	writeStringScript(cell, buff)
@@ -60,32 +60,33 @@ func prettyPrint(cell *BinaryCell) (_ []byte) {
 	return buff.Bytes()
 }
 
-func writeStringScript(cell *BinaryCell, buff *bytes.Buffer) {
+func writeStringScript(cell Cell, buff *bytes.Buffer) {
 	buff.WriteString(strings.ToUpper(fmt.Sprintf("OP_%s", cell.OpCode)))
-	if len(cell.Memory) > 0 {
+	if len(cell.Memory()) > 0 {
 		writePrettyMemory(cell, buff)
 	}
-	if len(cell.Children) == 0 {
+	children := cell.ChildrenSize()
+	if children == 0 {
 		return
 	}
 	buff.WriteString(" [ ")
-	for _, child := range cell.Children {
-		writeStringScript(child, buff)
+	for index := 0; index < children; index++ {
+		writeStringScript(cell.Child(index), buff)
 		buff.WriteByte(' ')
 	}
 	buff.WriteString("]")
 }
 
-func writePrettyMemory(cell *BinaryCell, buff *bytes.Buffer) {
+func writePrettyMemory(cell Cell, buff *bytes.Buffer) {
 	buff.WriteByte(' ')
-	switch cell.OpCode {
+	switch cell.OpCode() {
 	case 31, 62, 75: // uint64 or id or nonce
-		i, _ := proto.DecodeVarint(cell.Memory)
+		i, _ := proto.DecodeVarint(cell.Memory())
 		buff.WriteString(fmt.Sprintf("%d", i))
 	case 63, 70: // cid or pubkey addr
-		c, _ := cid.Cast(cell.Memory)
+		c, _ := cid.Cast(cell.Memory())
 		buff.WriteString(c.String())
 	default:
-		buff.WriteString(fmt.Sprintf("0x%x", cell.Memory))
+		buff.WriteString(fmt.Sprintf("0x%x", cell.Memory()))
 	}
 }

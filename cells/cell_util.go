@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package opcode
+package cells
 
 import (
 	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
 
-	"github.com/ipfn/ipfn/go/cids"
 	multihash "github.com/multiformats/go-multihash"
+	"github.com/rootchain/go-rootchain/cids"
 )
 
 // TODO - Returns empty cell.
@@ -32,20 +32,20 @@ func Ops(ops ...*BinaryCell) []*BinaryCell {
 }
 
 // Op - Creates new binary cell.
-func Op(op ID, ops ...*BinaryCell) *BinaryCell {
-	return &BinaryCell{OpCode: op, Children: ops}
+func Op(op ID, ops ...Cell) *BinaryCell {
+	return &BinaryCell{opCode: op, children: ops}
 }
 
 // RootOp - Creates new binary cell.
-func RootOp(ops []*BinaryCell) *BinaryCell {
-	return &BinaryCell{Children: ops}
+func RootOp(ops []Cell) *BinaryCell {
+	return &BinaryCell{children: ops}
 }
 
 // New - Creates new binary cell.
 func New(op ID, memory []byte) *BinaryCell {
 	return &BinaryCell{
-		OpCode: op,
-		Memory: memory,
+		opCode: op,
+		memory: memory,
 	}
 }
 

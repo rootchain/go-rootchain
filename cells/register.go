@@ -12,19 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package opcode
+package cells
 
-// Cell - Operation cell interface.
-type Cell interface {
-	// ID - Operation ID.
-	ID() ID
+var registry = make(map[ID]string)
 
-	// Memory - Operation memory.
-	Memory() []byte
-
-	// Children - Amount of children.
-	Children() int
-
-	// Child - Child cell by index.
-	Child(int) Cell
+// Register - Registers op code.
+// Panics if code is not unique.
+func Register(code ID, name string) ID {
+	registry[code] = name
+	return code
 }

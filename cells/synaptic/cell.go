@@ -19,35 +19,35 @@ import (
 	"math/big"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/ipfn/ipfn/go/opcode"
+	"github.com/rootchain/go-rootchain/cells"
 )
 
 // BigInt - Creates new big int cell.
-func BigInt(num *big.Int) *opcode.BinaryCell {
-	return opcode.New(OpBigInt, num.Bytes())
+func BigInt(num *big.Int) *cells.BinaryCell {
+	return cells.New(OpBigInt, num.Bytes())
 }
 
 // Uint64 - Creates new uint64 cell.
-func Uint64(num uint64) *opcode.BinaryCell {
-	return opcode.New(OpUint64, proto.EncodeVarint(num))
+func Uint64(num uint64) *cells.BinaryCell {
+	return cells.New(OpUint64, proto.EncodeVarint(num))
 }
 
 // Bytes - Creates new bytes cell.
-func Bytes(bytes []byte) *opcode.BinaryCell {
-	return opcode.New(OpBytes, bytes)
+func Bytes(bytes []byte) *cells.BinaryCell {
+	return cells.New(OpBytes, bytes)
 }
 
 // ParseBigInt - Creates new big int cell from hex string.
-func ParseBigInt(str string) (_ *opcode.BinaryCell, err error) {
+func ParseBigInt(str string) (_ *cells.BinaryCell, err error) {
 	bytes, err := hex.DecodeString(str)
 	if err != nil {
 		return
 	}
-	return opcode.New(OpUint64, bytes), nil
+	return cells.New(OpUint64, bytes), nil
 }
 
 // MustParseBigInt - Creates new big int cell from string.
-func MustParseBigInt(str string) (c *opcode.BinaryCell) {
+func MustParseBigInt(str string) (c *cells.BinaryCell) {
 	c, err := ParseBigInt(str)
 	if err != nil {
 		panic(err)

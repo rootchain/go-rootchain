@@ -14,13 +14,11 @@
 
 package chainops
 
-import (
-	"github.com/ipfn/ipfn/go/opcode"
-)
+import "github.com/rootchain/go-rootchain/cells"
 
 const (
 	// OpOffset - Offset of chain operation code.
-	OpOffset opcode.ID = iota + 0x3c
+	OpOffset cells.ID = iota + 0x3c
 
 	// OpMultihash - Multihash native operation code.
 	OpMultihash = OpOffset + 1
@@ -68,24 +66,24 @@ const (
 	OpNonce = OpOffset + 15
 
 	// OpRoot - Offset of chain operation code.
-	OpRoot opcode.ID = 0
+	OpRoot cells.ID = 0
 )
 
 func init() {
-	opcode.Register(OpID, "id")
-	opcode.Register(OpRoot, "root")
-	opcode.Register(OpHeader, "header")
-	opcode.Register(OpGenesis, "genesis")
-	opcode.Register(OpAssignPower, "assign_power")
-	opcode.Register(OpDelegatePower, "delegate_power")
-	opcode.Register(OpSignature, "signature")
-	opcode.Register(OpPubkey, "pubkey")
-	opcode.Register(OpPubkeyAddr, "pubkey_addr")
-	opcode.Register(OpSigned, "signed")
-	opcode.Register(OpAddress, "address")
-	opcode.Register(OpMultihash, "multihash")
-	opcode.Register(OpCID, "cid")
-	opcode.Register(OpClaim, "claim")
-	opcode.Register(OpTransfer, "transfer")
-	opcode.Register(OpNonce, "nonce")
+	cells.Register(OpID, "id")
+	cells.Register(OpRoot, "root")
+	cells.Register(OpHeader, "header")
+	cells.Register(OpGenesis, "genesis")
+	cells.Register(OpAssignPower, "assign_power")
+	cells.Register(OpDelegatePower, "delegate_power")
+	cells.Register(OpSignature, "signature")
+	cells.Register(OpPubkey, "pubkey")
+	cells.Register(OpPubkeyAddr, "pubkey_addr")
+	cells.Register(OpSigned, "signed")
+	cells.Register(OpAddress, "address")
+	cells.Register(OpMultihash, "multihash")
+	cells.Register(OpCID, "cid")
+	cells.Register(OpClaim, "claim")
+	cells.Register(OpTransfer, "transfer")
+	cells.Register(OpNonce, "nonce")
 }

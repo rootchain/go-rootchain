@@ -14,28 +14,28 @@
 
 package synaptic
 
-import "github.com/ipfn/ipfn/go/opcode"
+import "github.com/rootchain/go-rootchain/cells"
 
-// OpOffset - Synaptic opcode offset.
-const OpOffset opcode.ID = 0x1c
+// OpOffset - Synaptic cells offset.
+const OpOffset cells.ID = 0x1c
 
 const (
-	// OpBytes - Synaptic byte array opcode.
+	// OpBytes - Synaptic byte array cells.
 	OpBytes = OpOffset + 1
-	// OpInt64 - Synaptic uint64 opcode.
+	// OpInt64 - Synaptic uint64 cells.
 	OpInt64 = OpOffset + 2
-	// OpUint64 - Synaptic uint64 opcode.
+	// OpUint64 - Synaptic uint64 cells.
 	OpUint64 = OpOffset + 3
-	// OpBigInt - Synaptic big int opcode.
+	// OpBigInt - Synaptic big int cells.
 	OpBigInt = OpOffset + 4
-	// OpString - Synaptic string opcode.
+	// OpString - Synaptic string cells.
 	OpString = OpBytes
 )
 
 func init() {
-	opcode.Register(OpBytes, "bytes")
-	opcode.Register(OpInt64, "int64")
-	opcode.Register(OpUint64, "uint64")
-	opcode.Register(OpBigInt, "bigint")
-	opcode.Register(OpString, "string")
+	cells.Register(OpBytes, "bytes")
+	cells.Register(OpInt64, "int64")
+	cells.Register(OpUint64, "uint64")
+	cells.Register(OpBigInt, "bigint")
+	cells.Register(OpString, "string")
 }
