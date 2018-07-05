@@ -16,8 +16,6 @@ package cells
 
 import (
 	"encoding/json"
-
-	"github.com/gogo/protobuf/proto"
 )
 
 // Cell - Operation cell interface.
@@ -70,7 +68,7 @@ func (cell *BinaryCell) CID() (_ *CID) {
 	if cell.cid != nil {
 		return cell.cid
 	}
-	body, err := cell.Marshal()
+	body, err := Marshal(cell)
 	if err != nil {
 		panic(err)
 	}
@@ -107,21 +105,30 @@ func (cell *BinaryCell) ChildrenSize() int {
 // AddChild - Appends new children operation.
 func (cell *BinaryCell) AddChild(child Cell) {
 	cell.children = append(cell.children, child)
+	cell.reset()
 }
 
 // SetOpCode - Sets operation ID.
 func (cell *BinaryCell) SetOpCode(opCode ID) {
 	cell.opCode = opCode
+	cell.reset()
 }
 
 // SetMemory - Set operation memory.
 func (cell *BinaryCell) SetMemory(memory []byte) {
 	cell.memory = memory
+	cell.reset()
 }
 
 // SetChildren - Set operation children.
 func (cell *BinaryCell) SetChildren(children []Cell) {
 	cell.children = children
+	cell.reset()
+}
+
+// Checksum - Computes marshalled xxhash64 of cell content id.
+func (cell *BinaryCell) Checksum() (_ ID, err error) {
+	return NewID(cell.CID().Bytes()), nil
 }
 
 // MarshalJSON - Marshals cell as JSON.
@@ -142,32 +149,7 @@ func (cell *BinaryCell) MarshalJSON() (_ []byte, err error) {
 	})
 }
 
-// Marshal - Marshals cell as byte array.
-func (cell *BinaryCell) Marshal() (_ []byte, err error) {
-	if cell.body != nil {
-		return cell.body, nil
-	}
-	buff := proto.NewBuffer(nil)
-	err = marshal(cell, buff)
-	if err != nil {
-		return
-	}
-	cell.body = buff.Bytes()
-	return cell.body, nil
-}
-
-// Unmarshal - Unmarshals cell from byte array.
-func (cell *BinaryCell) Unmarshal(body []byte) (err error) {
-	cell.body = body
-	return unmarshal(cell, proto.NewBuffer(body))
-}
-
-// Checksum - Computes marshalled xxhash64 of cell content id.
-func (cell *BinaryCell) Checksum() (_ ID, err error) {
-	// hash, err := cell.CID()
-	// if err != nil {
-	// 	return
-	// }
-	// return NewID(hash.Bytes()), nil
-	return NewID(cell.CID().Bytes()), nil
+func (cell *BinaryCell) reset() {
+	cell.cid = nil
+	cell.body = nil
 }

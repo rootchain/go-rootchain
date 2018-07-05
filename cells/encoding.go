@@ -42,17 +42,32 @@ func MarshalJSON(cell *BinaryCell) (_ []byte, err error) {
 }
 
 // Marshal - Marshals cell as byte array.
-func Marshal(cell Cell) (_ []byte, err error) {
+func Marshal(cell Cell) (body []byte, err error) {
+	switch v := cell.(type) {
+	case *BinaryCell:
+		if v.body != nil {
+			return v.body, nil
+		}
+	}
 	buff := proto.NewBuffer(nil)
 	err = marshal(cell, buff)
 	if err != nil {
 		return
 	}
-	return buff.Bytes(), nil
+	body = buff.Bytes()
+	switch v := cell.(type) {
+	case *BinaryCell:
+		v.body = body
+	}
+	return
 }
 
 // Unmarshal - Unmarshals cell from byte array.
 func Unmarshal(cell MutableCell, body []byte) error {
+	switch v := cell.(type) {
+	case *BinaryCell:
+		v.body = body
+	}
 	return unmarshal(cell, proto.NewBuffer(body))
 }
 

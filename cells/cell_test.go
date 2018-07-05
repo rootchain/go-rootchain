@@ -37,25 +37,25 @@ var (
 )
 
 func TestBinaryCell(t *T) {
-	b, err := simpleCell.Marshal()
+	b, err := Marshal(simpleCell)
 	assert.Equal(t, nil, err)
-	unc := new(BinaryCell)
-	err = unc.Unmarshal(b)
+	de := new(BinaryCell)
+	err = Unmarshal(de, b)
 	assert.Equal(t, nil, err)
-	b2, _ := unc.Marshal()
+	b2, _ := Marshal(de)
 	assert.Equal(t, b, b2)
-	assert.Equal(t, simpleCell.OpCode(), unc.OpCode())
+	assert.Equal(t, simpleCell.OpCode(), de.OpCode())
 
-	id, err := unc.Checksum()
+	id, err := de.Checksum()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, ID(0x1663e9dbd3c404b2), id)
 
-	cid := unc.CID()
+	cid := de.CID()
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "zFuncm69CFEp3YTS4vgNGpXJHUKZVgo6Qzr6syTNjZrrKFugu4K1", cid.String())
 
 	jb1, _ := json.Marshal(simpleCell)
-	jb2, _ := json.Marshal(unc)
+	jb2, _ := json.Marshal(de)
 	assert.Equal(t, jb1, jb2)
 }
 
@@ -66,7 +66,7 @@ func TestBinaryCell_Size(t *T) {
 		New(0x1c1, proto.EncodeVarint(xxhash.Sum64String("v1"))),
 		New(0x1c2, proto.EncodeVarint(xxhash.Sum64String("r2"))),
 		New(0x1c3, proto.EncodeVarint(xxhash.Sum64String("s3"))))
-	b, _ := c.Marshal()
+	b, _ := Marshal(c)
 	assert.Equal(t, 64, len(b))
 	assert.Equal(t, 130, len(fmt.Sprintf("0x%x", b)))
 	b, _ = json.Marshal(c)
@@ -76,22 +76,22 @@ func TestBinaryCell_Size(t *T) {
 
 func TestBinaryCell_Size2(t *T) {
 	c := Root(Ops(Op(1), Op(1), Op(1), Op(1)))
-	b, _ := c.Marshal()
+	b, _ := Marshal(c)
 	assert.Equal(t, 15, len(b))
 	c = Root(Ops(Op(1), Op(1), Op(1)))
-	b, _ = c.Marshal()
+	b, _ = Marshal(c)
 	assert.Equal(t, 12, len(b))
 	c = Root(Ops(Op(1), Op(1)))
-	b, _ = c.Marshal()
+	b, _ = Marshal(c)
 	assert.Equal(t, 9, len(b))
 	c = Root(Ops(Op(1)))
-	b, _ = c.Marshal()
+	b, _ = Marshal(c)
 	assert.Equal(t, 6, len(b))
 	c = Op(1, Op(1))
-	b, _ = c.Marshal()
+	b, _ = Marshal(c)
 	assert.Equal(t, 6, len(b))
 	c = Op(1)
-	b, _ = c.Marshal()
+	b, _ = Marshal(c)
 	assert.Equal(t, 3, len(b))
 }
 
@@ -106,6 +106,6 @@ var benchCell = New(0, []byte("test"),
 
 func BenchmarkBinaryCell_Marshal(b *B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = benchCell.Marshal()
+		_, _ = Marshal(benchCell)
 	}
 }

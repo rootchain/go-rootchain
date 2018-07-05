@@ -22,7 +22,7 @@ import (
 
 // NewHeadCID - Computes header cid.
 func NewHeadCID(hdr *Header) (_ *cells.CID, err error) {
-	body, err := hdr.Cell().Marshal()
+	body, err := cells.Marshal(hdr.Cell())
 	if err != nil {
 		return
 	}

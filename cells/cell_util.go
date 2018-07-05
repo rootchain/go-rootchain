@@ -53,7 +53,7 @@ func New(op ID, memory []byte, children ...Cell) *BinaryCell {
 // UnmarshalCell - Unmarshals new binary cell.
 func UnmarshalCell(body []byte) (c *BinaryCell, err error) {
 	c = new(BinaryCell)
-	err = c.Unmarshal(body)
+	err = Unmarshal(c, body)
 	return
 }
 

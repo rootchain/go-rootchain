@@ -89,7 +89,7 @@ func Multihash(mh multihash.Multihash) *cells.BinaryCell {
 
 // Sign - Signs binary cell and creates signed operation.
 func Sign(op *cells.BinaryCell, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
-	body, err := op.Marshal()
+	body, err := cells.Marshal(op)
 	if err != nil {
 		return
 	}
