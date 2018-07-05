@@ -115,7 +115,7 @@ func Signature(sig []byte) (_ *cells.BinaryCell) {
 }
 
 // Signed - Creates signed binary cell.
-func Signed(op *cells.BinaryCell, signatures ...*cells.BinaryCell) *cells.BinaryCell {
+func Signed(op *cells.BinaryCell, signatures ...cells.Cell) *cells.BinaryCell {
 	ops := append(cells.Ops(op), signatures...)
 	return cells.Op(OpSigned, ops...)
 }
@@ -158,7 +158,7 @@ func DelegatePower(nonce cells.ID, quantity uint64, pubkeys ...[]byte) (c *cells
 		synaptic.Uint64(quantity))
 	if len(pubkeys) > 0 {
 		for _, pubkey := range pubkeys {
-			c.Add(PubkeyBytes(pubkey))
+			c.AddChild(PubkeyBytes(pubkey))
 		}
 	}
 	return

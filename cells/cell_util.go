@@ -18,7 +18,7 @@ import (
 	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
 
 	multihash "github.com/multiformats/go-multihash"
-	"github.com/rootchain/go-rootchain/cids"
+	"github.com/rootchain/go-rootchain/dev/cids"
 )
 
 // TODO - Returns empty cell.
@@ -27,7 +27,7 @@ func TODO() *BinaryCell {
 }
 
 // Ops - Returns ops.
-func Ops(ops ...*BinaryCell) []*BinaryCell {
+func Ops(ops ...Cell) []Cell {
 	return ops
 }
 
@@ -36,16 +36,17 @@ func Op(op ID, ops ...Cell) *BinaryCell {
 	return &BinaryCell{opCode: op, children: ops}
 }
 
-// RootOp - Creates new binary cell.
-func RootOp(ops []Cell) *BinaryCell {
+// Root - Creates new binary cell.
+func Root(ops []Cell) *BinaryCell {
 	return &BinaryCell{children: ops}
 }
 
 // New - Creates new binary cell.
-func New(op ID, memory []byte) *BinaryCell {
+func New(op ID, memory []byte, children ...Cell) *BinaryCell {
 	return &BinaryCell{
-		opCode: op,
-		memory: memory,
+		opCode:   op,
+		memory:   memory,
+		children: children,
 	}
 }
 

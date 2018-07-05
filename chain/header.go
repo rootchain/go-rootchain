@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ipfn/ipfn/go/opcode"
+	"github.com/rootchain/go-rootchain/cells"
 )
 
 // Header - State header structure.
@@ -30,23 +30,23 @@ type Header struct {
 	Time time.Time `json:"timestamp,omitempty"`
 
 	// Head - Head content ID.
-	Head *opcode.CID `json:"head_hash,omitempty"`
+	Head *cells.CID `json:"head_hash,omitempty"`
 
 	// Prev - Previous state hash.
-	Prev *opcode.CID `json:"prev_hash,omitempty"`
+	Prev *cells.CID `json:"prev_hash,omitempty"`
 
 	// Exec - State execution hash.
-	Exec *opcode.CID `json:"exec_hash,omitempty"`
+	Exec *cells.CID `json:"exec_hash,omitempty"`
 
 	// State - State trie hash.
-	State *opcode.CID `json:"state_hash,omitempty"`
+	State *cells.CID `json:"state_hash,omitempty"`
 
 	// Signed - Signed hash.
-	Signed *opcode.CID `json:"signed_hash,omitempty"`
+	Signed *cells.CID `json:"signed_hash,omitempty"`
 }
 
 // NewHeader - Creates new state header structure.
-func NewHeader(index uint64, prevHash *opcode.CID, execCID *opcode.CID) (hdr *Header, err error) {
+func NewHeader(index uint64, prevHash *cells.CID, execCID *cells.CID) (hdr *Header, err error) {
 	if prevHash == nil && index > 0 {
 		return nil, fmt.Errorf("prev hash cannot be empty with index %d", index)
 	}
@@ -61,7 +61,7 @@ func NewHeader(index uint64, prevHash *opcode.CID, execCID *opcode.CID) (hdr *He
 		return nil, err
 	}
 	// BUG(crackcomm): fucking state trie hash?!
-	hdr.State, err = opcode.SumCID(StateTriePrefix, hdr.Head.Bytes())
+	hdr.State, err = cells.SumCID(StateTriePrefix, hdr.Head.Bytes())
 	if err != nil {
 		return
 	}

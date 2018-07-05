@@ -19,9 +19,9 @@ import (
 
 	"github.com/ipfn/go-base32check"
 
-	"github.com/ipfn/ipfn/go/opcode"
-	"github.com/ipfn/ipfn/go/opcode/chainops"
-	"github.com/ipfn/ipfn/go/opcode/synaptic"
+	"github.com/rootchain/go-rootchain/cells"
+	"github.com/rootchain/go-rootchain/cells/chainops"
+	"github.com/rootchain/go-rootchain/cells/synaptic"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,30 +32,26 @@ var (
 
 func TestBinaryCell(t *T) {
 
-	genesisOp := &opcode.BinaryCell{OpCode: chainops.OpGenesis}
+	genesisOp := chainops.Genesis()
 
 	// signedGenesis := signedOp(genesisOp, key)
 
-	allocOp := &opcode.BinaryCell{
-		OpCode: chainops.OpAssignPower,
-		Children: []*opcode.BinaryCell{
-			chainops.MustParseAddress("b7dlu9ahtazhar30psm4sqlc"),
-			synaptic.Uint64(1e6),
-		},
-	}
+	allocOp := cells.Op(chainops.OpAssignPower,
+		chainops.MustParseAddress("b7dlu9ahtazhar30psm4sqlc"),
+		synaptic.Uint64(1e6))
 
 	var head string
-	state, err := NewState(0, nil, opcode.Ops(genesisOp, allocOp))
+	state, err := NewState(0, nil, cells.Ops(genesisOp, allocOp))
 	assert.Equal(t, nil, err)
 	assert.Equal(t, uint64(0), state.Height())
 	// assert.Equal(t, "zFSec2XVAw1qbBFm7rFFV81U8UwGqBLuV7SGze8vPyQbziy7zbku", state.Head().String())
 	// assert.Equal(t, "zFSec2XV6dbiDRvMX7aKz3eEkyxuWPjdiwFvVbe5MXomnT5ZdwT1", state.Header.Exec.String())
 	head = state.Head().String()
 
-	body, err := state.Root().Marshal()
+	body, err := cells.Marshal(state.Root())
 	assert.Equal(t, genesisEnc, base32check.EncodeToString(body))
 
-	state, err = state.Next(opcode.Ops(allocOp))
+	state, err = state.Next(cells.Ops(allocOp))
 	assert.Equal(t, nil, err)
 	assert.Equal(t, uint64(1), state.Height())
 	assert.Equal(t, head, state.Prev().String())
@@ -63,17 +59,17 @@ func TestBinaryCell(t *T) {
 	// assert.Equal(t, "zFSec2XVGN5saHLfhnwm3s5TRXTPNGGcbggyfXSYLP97nxn6HStJ", state.Header.Exec.String())
 	head = state.Head().String()
 
-	body, err = state.Root().Marshal()
+	body, err = cells.Marshal(state.Root())
 	assert.Equal(t, allocEnc, base32check.EncodeToString(body))
 
-	state, err = state.Next(opcode.Ops(allocOp))
+	state, err = state.Next(cells.Ops(allocOp))
 	assert.Equal(t, nil, err)
 	assert.Equal(t, uint64(2), state.Height())
 	assert.Equal(t, head, state.Prev().String())
 	// assert.Equal(t, "zFSec2XV3e6uoSd8sTcBM717xMweVCBQFBoMQc4Qy3JGtYMtu34E", state.Head().String())
 	// assert.Equal(t, "zFSec2XVGN5saHLfhnwm3s5TRXTPNGGcbggyfXSYLP97nxn6HStJ", state.Header.Exec.String())
 
-	body, err = state.Root().Marshal()
+	body, err = cells.Marshal(state.Root())
 	assert.Equal(t, allocEnc, base32check.EncodeToString(body))
 
 }

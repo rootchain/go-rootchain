@@ -18,7 +18,7 @@ import (
 	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
 	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
 
-	"github.com/ipfn/ipfn/go/cids"
+	"github.com/rootchain/go-rootchain/dev/cids"
 )
 
 // HeaderPrefix - Header CID prefix.

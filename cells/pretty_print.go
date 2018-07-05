@@ -34,10 +34,11 @@ func NewPrinter(cell Cell) *CellPrinter {
 	return &CellPrinter{Cell: cell}
 }
 
-// NewPrinters - Creates new cell pretty printer.
-func NewPrinters(cells []Cell) (res []*CellPrinter) {
-	for _, cell := range cells {
-		res = append(res, NewPrinter(cell))
+// NewChildrenPrinter - Creates new cell pretty printer.
+func NewChildrenPrinter(cell Cell) (res []*CellPrinter) {
+	count := cell.ChildrenSize()
+	for index := 0; index < count; index++ {
+		res = append(res, NewPrinter(cell.Child(index)))
 	}
 	return
 }
@@ -61,7 +62,7 @@ func prettyPrint(cell Cell) (_ []byte) {
 }
 
 func writeStringScript(cell Cell, buff *bytes.Buffer) {
-	buff.WriteString(strings.ToUpper(fmt.Sprintf("OP_%s", cell.OpCode)))
+	buff.WriteString(strings.ToUpper(fmt.Sprintf("OP_%s", cell.OpCode())))
 	if len(cell.Memory()) > 0 {
 		writePrettyMemory(cell, buff)
 	}

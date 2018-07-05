@@ -20,30 +20,31 @@ import (
 	"fmt"
 
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
-	"github.com/ipfn/ipfn/go/opcode/chainops"
+	"github.com/rootchain/go-rootchain/cells"
+	"github.com/rootchain/go-rootchain/cells/chainops"
 
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/ipfn/ipfn/go/opcode"
 )
 
 // State - Chain state structure.
 type State struct {
 	header     *Header
-	opsRoot    *opcode.BinaryCell
-	sigRoot    *opcode.BinaryCell
+	opsRoot    cells.MutableCell
+	sigRoot    cells.MutableCell
 	signatures [][]byte
 }
 
 // NewState - Creates new state structure.
-func NewState(index uint64, prevHash *opcode.CID, execOps []*opcode.BinaryCell) (_ *State, err error) {
+func NewState(index uint64, prevHash *cells.CID, execOps []cells.Cell) (_ *State, err error) {
 	if prevHash == nil && index > 0 {
 		return nil, fmt.Errorf("prev hash cannot be empty with index %d", index)
 	}
-	opsRoot := opcode.RootOp(execOps)
-	execCID, err := opsRoot.CID()
-	if err != nil {
-		return
-	}
+	opsRoot := cells.Root(execOps)
+	execCID := opsRoot.CID()
+	// execCID, err := opsRoot.CID()
+	// if err != nil {
+	// 	return
+	// }
 	header, err := NewHeader(index, prevHash, execCID)
 	if err != nil {
 		return
@@ -57,24 +58,20 @@ func NewState(index uint64, prevHash *opcode.CID, execOps []*opcode.BinaryCell) 
 }
 
 // Head - Returns head CID.
-func (state *State) Head() *opcode.CID {
+func (state *State) Head() *cells.CID {
 	if state.header.Head == nil {
-		var err error
-		state.header.Head, err = state.opsRoot.CID()
-		if err != nil {
-			panic(err)
-		}
+		state.header.Head = state.opsRoot.CID()
 	}
 	return state.header.Head
 }
 
 // Signed - Returns signed head CID.
-func (state *State) Signed() *opcode.CID {
+func (state *State) Signed() *cells.CID {
 	return state.header.Signed
 }
 
 // Prev - Returns previous CID.
-func (state *State) Prev() *opcode.CID {
+func (state *State) Prev() *cells.CID {
 	return state.header.Prev
 }
 
@@ -84,7 +81,7 @@ func (state *State) Height() uint64 {
 }
 
 // Root - Returns root operation.
-func (state *State) Root() *opcode.BinaryCell {
+func (state *State) Root() cells.Cell {
 	return state.opsRoot
 }
 
@@ -94,8 +91,8 @@ func (state *State) Signatures() [][]byte {
 }
 
 // Exec - Adds operation to execute.
-func (state *State) Exec(op *opcode.BinaryCell) {
-	state.opsRoot.Add(op)
+func (state *State) Exec(op cells.Cell) {
+	state.opsRoot.AddChild(op)
 	state.reset()
 }
 
@@ -105,7 +102,7 @@ func (state *State) reset() {
 }
 
 // Next - Returns next state including given ops.
-func (state *State) Next(exec []*opcode.BinaryCell) (*State, error) {
+func (state *State) Next(exec []cells.Cell) (*State, error) {
 	if len(exec) == 0 {
 		return nil, errors.New("cannot produce state with zero operations")
 	}
@@ -114,34 +111,34 @@ func (state *State) Next(exec []*opcode.BinaryCell) (*State, error) {
 
 // Sign - Signs state with given private key.
 // Computes new signed header hash.
-func (state *State) Sign(key *btcec.PrivateKey) (_ *opcode.BinaryCell, err error) {
+func (state *State) Sign(key *btcec.PrivateKey) (_ cells.Cell, err error) {
 	// BUG(crackcomm): proper fucking signature xD
 	sigOp, err := chainops.SignBytes(state.Head().Bytes(), key)
 	if err != nil {
 		return
 	}
-	state.sigRoot.Add(sigOp)
-	logger.Printf("sigRoot: %#v", opcode.NewPrinter(sigOp).String())
-	state.signatures = append(state.signatures, sigOp.Memory)
-	body, err := state.sigRoot.Marshal()
+	state.sigRoot.AddChild(sigOp)
+	logger.Printf("sigRoot: %#v", cells.NewPrinter(sigOp).String())
+	state.signatures = append(state.signatures, sigOp.Memory())
+	body, err := cells.Marshal(state.sigRoot)
 	if err != nil {
 		return
 	}
-	state.header.Signed, err = opcode.SumCID(SignedPrefix, body)
+	state.header.Signed, err = cells.SumCID(SignedPrefix, body)
 	return
 }
 
 type stateJSON struct {
-	Header     *Header               `json:"header,omitempty"`
-	ExecOps    []*opcode.CellPrinter `json:"exec_ops,omitempty"`
-	Signatures [][]byte              `json:"signatures,omitempty"`
+	Header     *Header              `json:"header,omitempty"`
+	ExecOps    []*cells.CellPrinter `json:"exec_ops,omitempty"`
+	Signatures [][]byte             `json:"signatures,omitempty"`
 }
 
 // MarshalJSON - Marshals state to JSON.
 func (state *State) MarshalJSON() ([]byte, error) {
 	return json.Marshal(stateJSON{
 		Header:     state.header,
-		ExecOps:    opcode.NewPrinters(state.opsRoot.Children),
+		ExecOps:    cells.NewChildrenPrinter(state.opsRoot),
 		Signatures: state.signatures,
 	})
 }

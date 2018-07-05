@@ -15,23 +15,23 @@
 package chain
 
 import (
-	"github.com/ipfn/ipfn/go/opcode"
-	"github.com/ipfn/ipfn/go/opcode/chainops"
-	"github.com/ipfn/ipfn/go/opcode/synaptic"
+	"github.com/rootchain/go-rootchain/cells"
+	"github.com/rootchain/go-rootchain/cells/chainops"
+	"github.com/rootchain/go-rootchain/cells/synaptic"
 )
 
 // NewHeadCID - Computes header cid.
-func NewHeadCID(hdr *Header) (_ *opcode.CID, err error) {
+func NewHeadCID(hdr *Header) (_ *cells.CID, err error) {
 	body, err := hdr.Cell().Marshal()
 	if err != nil {
 		return
 	}
-	return opcode.SumCID(HeaderPrefix, body)
+	return cells.SumCID(HeaderPrefix, body)
 }
 
 // Cell - Creates header binary cell.
-func (hdr *Header) Cell() *opcode.BinaryCell {
-	return opcode.Op(chainops.OpHeader,
+func (hdr *Header) Cell() *cells.BinaryCell {
+	return cells.Op(chainops.OpHeader,
 		synaptic.Uint64(hdr.Height),
 		synaptic.Uint64(uint64(hdr.Time.Unix())),
 		chainops.CID(hdr.Prev),
