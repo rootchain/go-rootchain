@@ -33,8 +33,11 @@ func init() {
 
 // ExportCmd - Seed export command.
 var ExportCmd = &cobra.Command{
-	Use:         "export [name]",
-	Short:       "Export master key",
+	Use:   "export [name]",
+	Short: "Export master key",
+	Long: `Exports wallet private key and mnmemonic seed.
+
+Default wallet name used is "default".`,
 	Annotations: map[string]string{"category": "wallet"},
 	Args:        checkExistsArgs,
 	Run:         cmdutil.WrapCommand(HandleExportCmd),

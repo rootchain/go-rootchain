@@ -37,8 +37,11 @@ func init() {
 
 // ImportCmd - Seed import command.
 var ImportCmd = &cobra.Command{
-	Use:         "import [name]",
-	Short:       "Import master key",
+	Use:   "import [name]",
+	Short: "Import master key",
+	Long: `Imports wallet private key or mnemonic seed.
+
+Default wallet name used is "default".`,
 	Annotations: map[string]string{"category": "wallet"},
 	Args:        CheckCreateArgs,
 	Run:         cmdutil.WrapCommand(HandleImportCmd),

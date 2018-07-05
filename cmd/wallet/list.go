@@ -32,6 +32,7 @@ func init() {
 var ListCmd = &cobra.Command{
 	Use:         "list",
 	Short:       "List master keys",
+	Long:        `Prints names of all available wallets.`,
 	Annotations: map[string]string{"category": "key"},
 	Run:         cmdutil.WrapCommand(HandleListCmd),
 }

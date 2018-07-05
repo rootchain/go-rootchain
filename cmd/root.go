@@ -26,12 +26,14 @@ import (
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 
 	"github.com/rootchain/go-rootchain/cmd/chain"
+	"github.com/rootchain/go-rootchain/cmd/sign"
 	"github.com/rootchain/go-rootchain/cmd/wallet"
 )
 
 func init() {
 	RootCmd.AddCommand(chain.RootCmd)
 	RootCmd.AddCommand(wallet.RootCmd)
+	RootCmd.AddCommand(sign.SignCmd)
 	RootCmd.PersistentFlags().BoolVarP(&logger.Verbose, "verbose", "v", false, "verbose logs output (stdout/stderr)")
 }
 

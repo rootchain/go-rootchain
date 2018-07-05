@@ -35,8 +35,12 @@ func init() {
 
 // CreateCmd - Seed new command.
 var CreateCmd = &cobra.Command{
-	Use:         "create [name]",
-	Short:       "Create new seed",
+	Use:   "create [name]",
+	Short: "Create new seed",
+	Long: `Creates new wallet seed.
+
+Default wallet name used is "default".`,
+	Example:     "  $ rcx wallet create exampple",
 	Annotations: map[string]string{"category": "wallet"},
 	Args:        CheckCreateArgs,
 	Run:         cmdutil.WrapCommand(HandleCreateCmd),
