@@ -9,9 +9,7 @@ IPFN Rootchain – Interplanetary Functions Blockchain Project.
 ## Install
 
 ```sh
-$ go get -u github.com/rootchain/go-rootchain/rcx
-$ # or
-$ go install github.com/rootchain/go-rootchain/rcx
+go get -u github.com/rootchain/go-rootchain/bin/rcx
 ```
 
 ## License
