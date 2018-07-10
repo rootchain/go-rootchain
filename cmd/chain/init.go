@@ -20,7 +20,7 @@ import (
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 	wallet "github.com/ipfn/go-ipfn-wallet"
-	"github.com/rootchain/go-rootchain/genesis"
+	"github.com/rootchain/go-rootchain/dev/genesis"
 )
 
 var assignPaths []string

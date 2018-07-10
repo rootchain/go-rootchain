@@ -56,17 +56,17 @@ func Init(config *Config) (state *chain.State, err error) {
 		}
 		assignOps = append(assignOps, chainops.AssignPower(0, dest.AssignQuantity, key.Serialize()))
 	}
-
+	// chain exec root op
 	root := chainops.Root()
 	root.AddChildren(chainops.Genesis())
 	root.AddChildren(assignOps...)
 	root.AddChildren(delegateOps...)
-
+	// initialize state
 	state, err = chain.NewState(0, nil, root)
 	if err != nil {
 		return nil, err
 	}
-
+	// sign state with private keys
 	for _, key := range privKeys {
 		if _, err := state.Sign(key); err != nil {
 			return nil, err
