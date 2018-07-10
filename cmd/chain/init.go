@@ -15,30 +15,19 @@
 package chain
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/spf13/cobra"
 
-	"github.com/ipfn/go-ipfn-cells"
-	"github.com/ipfn/go-ipfn-cells/chainops"
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
-	"github.com/ipfn/go-ipfn-wallet"
-	"github.com/rootchain/go-rootchain/chain"
+	wallet "github.com/ipfn/go-ipfn-wallet"
+	"github.com/rootchain/go-rootchain/genesis"
 )
 
-var (
-	keyPaths   []string
-	addrPowers []string
-)
+var assignPaths []string
 
 func init() {
 	RootCmd.AddCommand(InitCmd)
-	InitCmd.PersistentFlags().StringSliceVarP(&keyPaths, "key", "k", nil, "key path and power in key:power:delegated format")
-	InitCmd.PersistentFlags().StringSliceVarP(&addrPowers, "addr", "a", nil, "address and power in addr:power format")
+	InitCmd.PersistentFlags().StringSliceVarP(&assignPaths, "assign", "a", nil, "key path or address and power in key:power:delegated format")
 }
 
 // InitCmd - Config get command.
@@ -48,7 +37,7 @@ var InitCmd = &cobra.Command{
 	Long: `Initializes a new chain.
 
 See wallet usage for more information on key derivation path.`,
-	Example: `  $ rcx chain init -n mychain -k wallet:1e6:1e6 -k default/x/test:1e6:0
+	Example: `  $ rcx chain init -n mychain -a wallet:1e6:1e6 -a default/x/test:1e6:0
   $ rcx chain init -a zFNScYMGz4wQocWbvHVqS1HcbzNzJB5JK3eAkzF9krbSLZiV8cNr:1`,
 	Annotations: map[string]string{"category": "chain"},
 	Run:         cmdutil.WrapCommand(HandleInitCmd),
@@ -56,103 +45,31 @@ See wallet usage for more information on key derivation path.`,
 
 // HandleInitCmd - Handles chain init command.
 func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
-	w := wallet.NewDefault()
-
-	var (
-		privKeys    []*btcec.PrivateKey
-		assignOps   []cells.Cell
-		delegateOps []cells.Cell
-	)
+	config := &genesis.Config{Wallet: wallet.NewDefault()}
 
 	// create chain for default wallet by default
-	if len(keyPaths) == 0 && len(addrPowers) == 0 {
-		keyPaths = []string{"default:1e6:1e6"}
+	if len(assignPaths) == 0 {
+		assignPaths = []string{"default:1e6:1e6"}
 	}
 
-	passwords := make(map[string][]byte)
-
-	for _, keyPath := range keyPaths {
-		split := strings.Split(keyPath, ":")
-		if len(split) != 3 {
-			return fmt.Errorf("invalid key:power:delegated format: %q", keyPath)
-		}
-		power, err := strconv.ParseFloat(split[1], 64)
+	for _, path := range assignPaths {
+		power, err := genesis.ParsePowerString(path)
 		if err != nil {
 			return err
 		}
-		dpower, err := strconv.ParseFloat(split[2], 64)
-		if err != nil {
-			return err
-		}
-		path, err := wallet.ParseKeyPath(split[0])
-		if err != nil {
-			return err
-		}
-		password, ok := passwords[path.SeedName]
-		if !ok {
-			password, err = wallet.PromptWalletPassword(path.SeedName)
-			if err != nil {
-				return err
-			}
-			passwords[path.SeedName] = password
-		}
-
-		key, err := w.DeriveKey(path, password)
-		if err != nil {
-			return fmt.Errorf("wallet %s: %v", path.SeedName, err)
-		}
-
-		privkey, err := key.ECPrivKey()
-		if err != nil {
-			return err
-		}
-
-		if dpower == -1 {
-			dpower = power
-		}
-
-		if dpower != 0 {
-			op := chainops.DelegatePower(0, uint64(dpower), key.Serialize())
-			delegateOp, err := chainops.Sign(op, privkey)
-			if err != nil {
-				return err
-			}
-			privKeys = append(privKeys, privkey)
-			delegateOps = append(delegateOps, delegateOp)
-		}
-
-		assignOps = append(assignOps, chainops.AssignPower(0, uint64(power), key.Serialize()))
+		config.Assign(power)
 	}
 
-	for _, addrPower := range addrPowers {
-		split := strings.Split(addrPower, ":")
-		if len(split) != 2 {
-			return fmt.Errorf("invalid addr:power format: %q", addrPower)
-		}
-		power, err := strconv.ParseFloat(split[1], 64)
+	for _, key := range config.WalletKeys() {
+		_, err = wallet.PromptUnlock(config.Wallet, key)
 		if err != nil {
-			return err
+			return
 		}
-		c, err := cells.DecodeCID(split[0])
-		if err != nil {
-			return err
-		}
-		assignOps = append(assignOps, chainops.AssignPowerAddr(0, uint64(power), c))
 	}
 
-	ops := cells.Ops(chainops.Genesis())
-	ops = append(ops, assignOps...)
-	ops = append(ops, delegateOps...)
-
-	state, err := chain.NewState(0, nil, ops)
+	state, err := genesis.Init(config)
 	if err != nil {
-		return err
-	}
-
-	for _, key := range privKeys {
-		if _, err := state.Sign(key); err != nil {
-			return err
-		}
+		return
 	}
 
 	logger.PrintJSON(state)
