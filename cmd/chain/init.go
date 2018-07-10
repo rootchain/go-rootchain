@@ -59,17 +59,19 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 	w := wallet.NewDefault()
 
 	var (
-		privKeys []*btcec.PrivateKey
-
+		privKeys    []*btcec.PrivateKey
 		assignOps   []cells.Cell
 		delegateOps []cells.Cell
 	)
 
+	// create chain for default wallet by default
+	if len(keyPaths) == 0 && len(addrPowers) == 0 {
+		keyPaths = []string{"default:1e6:1e6"}
+	}
+
 	passwords := make(map[string][]byte)
 
-	var nonce cells.ID
 	for _, keyPath := range keyPaths {
-
 		split := strings.Split(keyPath, ":")
 		if len(split) != 3 {
 			return fmt.Errorf("invalid key:power:delegated format: %q", keyPath)
@@ -110,7 +112,7 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 		}
 
 		if dpower != 0 {
-			op := chainops.DelegatePower(nonce, uint64(dpower))
+			op := chainops.DelegatePower(0, uint64(dpower), key.Serialize())
 			delegateOp, err := chainops.Sign(op, privkey)
 			if err != nil {
 				return err
@@ -119,10 +121,7 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 			delegateOps = append(delegateOps, delegateOp)
 		}
 
-		assignOps = append(assignOps, chainops.AssignPower(nonce, uint64(power), key.Serialize()))
-
-		// TODO(crackcomm):
-		nonce++
+		assignOps = append(assignOps, chainops.AssignPower(0, uint64(power), key.Serialize()))
 	}
 
 	for _, addrPower := range addrPowers {
@@ -138,9 +137,7 @@ func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
 		if err != nil {
 			return err
 		}
-		assignOps = append(assignOps, chainops.AssignPowerAddr(nonce, uint64(power), c))
-		// TODO(crackcomm):
-		nonce++
+		assignOps = append(assignOps, chainops.AssignPowerAddr(0, uint64(power), c))
 	}
 
 	ops := cells.Ops(chainops.Genesis())
