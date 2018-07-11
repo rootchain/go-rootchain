@@ -27,9 +27,6 @@ import (
 	keypair "github.com/ipfn/go-ipfn-keypair"
 )
 
-// Handler - Operation handler function.
-type Handler func(State) (State, error)
-
 // assignOp - Assign power.
 func assignOp(state State) (res State, err error) {
 	if !state.Head().IsGenesis() {

@@ -25,34 +25,27 @@ import (
 type Cell interface {
 	cells.Cell
 
-	// Context - Execution context.
-	Context() context.Context
-
-	// WithContext - Cell with context.
-	WithContext(context.Context) Cell
-
 	// Parent - Parent cell.
 	Parent() cells.Cell
 
 	// ExecChild - Child cell by index.
 	ExecChild(int) Cell
+
+	// Context - Execution context.
+	Context() context.Context
+
+	// WithContext - Cell with context.
+	WithContext(context.Context) Cell
 }
 
 // NewRoot - Creates new root exec cell.
 func NewRoot(ctx context.Context, cell cells.Cell) Cell {
-	return &execCell{
-		Cell: cell,
-		ctx:  ctx,
-	}
+	return &execCell{Cell: cell, ctx: ctx}
 }
 
 // NewCell - Creates new exec cell.
 func NewCell(ctx context.Context, parent, cell cells.Cell) Cell {
-	return &execCell{
-		Cell:   cell,
-		ctx:    ctx,
-		parent: parent,
-	}
+	return &execCell{Cell: cell, ctx: ctx, parent: parent}
 }
 
 type execCell struct {
@@ -61,16 +54,11 @@ type execCell struct {
 	parent cells.Cell
 }
 
-func (c *execCell) Context() context.Context {
-	return c.ctx
-}
-
-func (c *execCell) WithContext(ctx context.Context) Cell {
-	return &execCell{
-		Cell:   c.Cell,
-		parent: c.parent,
-		ctx:    ctx,
+func (c *execCell) Parent() cells.Cell {
+	if c.parent == nil {
+		return chainops.Root(c.Cell)
 	}
+	return c.parent
 }
 
 func (c *execCell) ExecChild(n int) Cell {
@@ -83,9 +71,10 @@ func (c *execCell) ExecChild(n int) Cell {
 	}
 }
 
-func (c *execCell) Parent() cells.Cell {
-	if c.parent == nil {
-		return chainops.Root(c.Cell)
-	}
-	return c.parent
+func (c *execCell) Context() context.Context {
+	return c.ctx
+}
+
+func (c *execCell) WithContext(ctx context.Context) Cell {
+	return &execCell{Cell: c.Cell, parent: c.parent, ctx: ctx}
 }

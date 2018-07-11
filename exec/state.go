@@ -33,11 +33,7 @@ type State interface {
 
 // NewState - Creates new execution state.
 func NewState(head *chain.State, store Store, op Cell) State {
-	return &execState{
-		op:    op,
-		head:  head,
-		store: store,
-	}
+	return &execState{op: op, head: head, store: store}
 }
 
 type execState struct {
