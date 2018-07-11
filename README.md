@@ -1,7 +1,7 @@
 # Rootchain – IPFN Blockchain Project
 
 [![IPFN project](https://img.shields.io/badge/project-IPFN-blue.svg?style=flat-square)](https://github.com/ipfn)
-[![IPFN Documentation](https://img.shields.io/badge/documentation-IPFN-blue.svg?style=flat-square)](//ipfn.github.io/documentation/)
+[![GoDoc](https://godoc.org/github.com/rootchain/go-rootchain?status.svg)](https://godoc.org/github.com/rootchain/go-rootchain)
 [![Travis CI](https://travis-ci.org/ipfn/ipfn.svg?branch=master)](https://travis-ci.org/ipfn/ipfn)
 
 IPFN Rootchain – Interplanetary Functions Blockchain Project.
