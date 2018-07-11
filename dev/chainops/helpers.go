@@ -24,7 +24,7 @@ import (
 )
 
 // Root - Creates root operation.
-func Root(ops ...cells.Cell) (c *cells.BinaryCell) {
+func Root(ops ...cells.Cell) *cells.BinaryCell {
 	return cells.Op(OpRoot, ops...)
 }
 
@@ -48,16 +48,16 @@ func ParseID(src string) (_ *cells.BinaryCell, err error) {
 }
 
 // MustParseID - Creates new uint64 cell from string.
-func MustParseID(str string) (c *cells.BinaryCell) {
+func MustParseID(str string) *cells.BinaryCell {
 	c, err := ParseID(str)
 	if err != nil {
 		panic(err)
 	}
-	return
+	return c
 }
 
 // CID - Creates CID binary cell.
-func CID(c *cells.CID) (_ *cells.BinaryCell) {
+func CID(c *cells.CID) *cells.BinaryCell {
 	if c == nil {
 		return cells.Op(OpCID)
 	}
@@ -92,7 +92,7 @@ func SignBytes(body []byte, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err erro
 }
 
 // Signature - Creates signature binary cell.
-func Signature(sig []byte) (_ *cells.BinaryCell) {
+func Signature(sig []byte) *cells.BinaryCell {
 	return cells.New(OpSignature, sig)
 }
 
@@ -103,27 +103,27 @@ func Signed(op cells.Cell, signatures ...cells.Cell) *cells.BinaryCell {
 }
 
 // Pubkey - Creates public key cell.
-func Pubkey(pubkey *btcec.PublicKey) (c *cells.BinaryCell) {
+func Pubkey(pubkey *btcec.PublicKey) *cells.BinaryCell {
 	return PubkeyBytes(pubkey.SerializeCompressed())
 }
 
 // PubkeyBytes - Creates public key cell.
-func PubkeyBytes(pubkey []byte) (c *cells.BinaryCell) {
+func PubkeyBytes(pubkey []byte) *cells.BinaryCell {
 	return cells.New(OpPubkey, pubkey)
 }
 
 // AssignPower - Creates assign power operation.
-func AssignPower(nonce cells.ID, quantity uint64, addr *cells.CID) (c *cells.BinaryCell) {
-	c = cells.Op(OpAssignPower, synaptic.Uint64(quantity), CID(addr))
+func AssignPower(nonce cells.ID, quantity uint64, addr *cells.CID) *cells.BinaryCell {
+	c := cells.Op(OpAssignPower, synaptic.Uint64(quantity), CID(addr))
 	if nonce > 0 {
 		c.AddChildren(Nonce(nonce))
 	}
-	return
+	return c
 }
 
 // DelegatePower - Creates delegate power operation.
-func DelegatePower(nonce cells.ID, quantity uint64, addrs ...*cells.CID) (c *cells.BinaryCell) {
-	c = cells.Op(OpDelegatePower, synaptic.Uint64(quantity))
+func DelegatePower(nonce cells.ID, quantity uint64, addrs ...*cells.CID) *cells.BinaryCell {
+	c := cells.Op(OpDelegatePower, synaptic.Uint64(quantity))
 	if len(addrs) > 0 {
 		for _, addr := range addrs {
 			c.AddChildren(CID(addr))
@@ -132,7 +132,7 @@ func DelegatePower(nonce cells.ID, quantity uint64, addrs ...*cells.CID) (c *cel
 	if nonce > 0 {
 		c.AddChildren(Nonce(nonce))
 	}
-	return
+	return c
 }
 
 // PubkeyToAddr - Creates public key hash cell from public key.
@@ -163,10 +163,10 @@ func Nonce(nonce cells.ID) *cells.BinaryCell {
 // }
 
 // // MustParseAddress - Parses short address or panics.
-// func MustParseAddress(src string) (c *cells.BinaryCell) {
+// func MustParseAddress(src string) *cells.BinaryCell {
 // 	c, err := ParseAddress(src)
 // 	if err != nil {
 // 		panic(err)
 // 	}
-// 	return
+// 	return c
 // }
