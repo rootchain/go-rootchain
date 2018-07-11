@@ -21,10 +21,10 @@ import (
 
 	"github.com/btcsuite/btcd/btcec"
 	cells "github.com/ipfn/go-ipfn-cells"
-	"github.com/ipfn/go-ipfn-cells/chainops"
-	"github.com/ipfn/go-ipfn-cells/synaptic"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 	keypair "github.com/ipfn/go-ipfn-keypair"
+	"github.com/rootchain/go-rootchain/dev/chainops"
+	"github.com/rootchain/go-rootchain/dev/synaptic"
 )
 
 // assignOp - Assign power.

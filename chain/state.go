@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	"github.com/ipfn/go-ipfn-cells"
-	"github.com/ipfn/go-ipfn-cells/chainops"
+	"github.com/rootchain/go-rootchain/dev/chainops"
 
 	"github.com/btcsuite/btcd/btcec"
 )

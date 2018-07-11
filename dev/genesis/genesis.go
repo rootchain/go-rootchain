@@ -19,9 +19,9 @@ import (
 
 	"github.com/btcsuite/btcd/btcec"
 	cells "github.com/ipfn/go-ipfn-cells"
-	"github.com/ipfn/go-ipfn-cells/chainops"
 	wallet "github.com/ipfn/go-ipfn-wallet"
 	"github.com/rootchain/go-rootchain/chain"
+	"github.com/rootchain/go-rootchain/dev/chainops"
 )
 
 // Init - Initializes a new chain.

@@ -17,7 +17,7 @@ package exec
 import (
 	"fmt"
 
-	"github.com/ipfn/go-ipfn-cells/chainops"
+	"github.com/rootchain/go-rootchain/dev/chainops"
 )
 
 // Unwind - Unwinds execution of cells.

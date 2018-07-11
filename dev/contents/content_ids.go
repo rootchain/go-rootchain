@@ -40,8 +40,8 @@ var Codecs = map[string]uint64{
 // CodecToStr - Maps the numeric codec to its name.
 var CodecToStr = map[uint64]string{}
 
-// Register - Registers codecs in remote cids package.
-func Register(codecs map[string]uint64, codecToStr map[uint64]string) {
+// RegisterPrefixes - Registers codecs in remote cids package.
+func RegisterPrefixes(codecs map[string]uint64, codecToStr map[uint64]string) {
 	for name, codec := range Codecs {
 		codecs[name] = codec
 		codecToStr[codec] = name
@@ -50,15 +50,17 @@ func Register(codecs map[string]uint64, codecToStr map[uint64]string) {
 
 // Register codecs in `go-cid` package to inject IPFN codec types into IPFS.
 //
-// 	import ipfncids "github.com/rootchain/go-rootchain/dev/cids"
+// 	import _ "github.com/rootchain/go-rootchain/dev/contents"
+//
+// // or
 //
 // 	// optionally
 // 	func init() {
-// 		ipfncids.Register(cid.Codecs, cid.CodecToStr)
+// 		contents.RegisterPrefixes(cid.Codecs, cid.CodecToStr)
 // 	}
 func init() {
 	for name, codec := range Codecs {
 		CodecToStr[codec] = name
 	}
-	Register(cid.Codecs, cid.CodecToStr)
+	RegisterPrefixes(cid.Codecs, cid.CodecToStr)
 }

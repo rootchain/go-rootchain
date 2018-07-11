@@ -20,8 +20,8 @@ import (
 	"github.com/gogo/protobuf/proto"
 
 	cells "github.com/ipfn/go-ipfn-cells"
-	"github.com/ipfn/go-ipfn-cells/chainops"
-	"github.com/ipfn/go-ipfn-cells/synaptic"
+	"github.com/rootchain/go-rootchain/dev/chainops"
+	"github.com/rootchain/go-rootchain/dev/synaptic"
 )
 
 func cidOp(cell cells.Cell) (*cells.CID, error) {
