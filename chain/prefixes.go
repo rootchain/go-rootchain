@@ -18,13 +18,13 @@ import (
 	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
 	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
 
-	"github.com/rootchain/go-rootchain/dev/cids"
+	"github.com/rootchain/go-rootchain/dev/contents"
 )
 
 // HeaderPrefix - Header CID prefix.
 var HeaderPrefix = cid.Prefix{
 	Version:  1,
-	Codec:    cids.ChainHeader,
+	Codec:    contents.ChainHeader,
 	MhType:   mh.KECCAK_256,
 	MhLength: 32,
 }
@@ -32,7 +32,7 @@ var HeaderPrefix = cid.Prefix{
 // SignedPrefix - Signed header CID prefix.
 var SignedPrefix = cid.Prefix{
 	Version:  1,
-	Codec:    cids.ChainSigned,
+	Codec:    contents.ChainSigned,
 	MhType:   mh.KECCAK_256,
 	MhLength: 32,
 }
@@ -40,7 +40,7 @@ var SignedPrefix = cid.Prefix{
 // StateTriePrefix - State trie CID prefix.
 var StateTriePrefix = cid.Prefix{
 	Version:  1,
-	Codec:    cid.EthStateTrie, //cids.ChainStateTrie,
+	Codec:    cid.EthStateTrie,
 	MhType:   mh.KECCAK_256,
 	MhLength: 32,
 }
