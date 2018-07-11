@@ -34,11 +34,10 @@ type State struct {
 }
 
 // NewState - Creates new state structure.
-func NewState(index uint64, prevHash *cells.CID, execOps []cells.Cell) (_ *State, err error) {
+func NewState(index uint64, prevHash *cells.CID, opsRoot cells.MutableCell) (_ *State, err error) {
 	if prevHash == nil && index > 0 {
 		return nil, fmt.Errorf("prev hash cannot be empty with index %d", index)
 	}
-	opsRoot := cells.Root(execOps)
 	execCID := opsRoot.CID()
 	header, err := NewHeader(index, prevHash, execCID)
 	if err != nil {
@@ -87,8 +86,18 @@ func (state *State) Signatures() [][]byte {
 
 // Exec - Adds operation to execute.
 func (state *State) Exec(op cells.Cell) {
-	state.opsRoot.AddChild(op)
+	state.opsRoot.AddChildren(op)
 	state.reset()
+}
+
+// NOps - Returns amount of operations.
+func (state *State) NOps() int {
+	return state.opsRoot.ChildrenSize()
+}
+
+// IsGenesis - Returns true on zero height.
+func (state *State) IsGenesis() bool {
+	return state.Height() == 0
 }
 
 func (state *State) reset() {
@@ -97,11 +106,11 @@ func (state *State) reset() {
 }
 
 // Next - Returns next state including given ops.
-func (state *State) Next(exec []cells.Cell) (*State, error) {
-	if len(exec) == 0 {
+func (state *State) Next(root cells.MutableCell) (*State, error) {
+	if root.ChildrenSize() == 0 {
 		return nil, errors.New("cannot produce state with zero operations")
 	}
-	return NewState(state.Height()+1, state.Head(), exec)
+	return NewState(state.Height()+1, state.Head(), root)
 }
 
 // Sign - Signs state with given private key.
@@ -112,7 +121,7 @@ func (state *State) Sign(key *btcec.PrivateKey) (_ cells.Cell, err error) {
 	if err != nil {
 		return
 	}
-	state.sigRoot.AddChild(sigOp)
+	state.sigRoot.AddChildren(sigOp)
 	state.signatures = append(state.signatures, sigOp.Memory())
 	body, err := cells.Marshal(state.sigRoot)
 	if err != nil {

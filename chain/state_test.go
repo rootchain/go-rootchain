@@ -41,7 +41,7 @@ func TestBinaryCell(t *T) {
 		synaptic.Uint64(1e6))
 
 	var head string
-	state, err := NewState(0, nil, cells.Ops(genesisOp, allocOp))
+	state, err := NewState(0, nil, cells.Root(genesisOp, allocOp))
 	assert.Equal(t, nil, err)
 	assert.Equal(t, uint64(0), state.Height())
 	// assert.Equal(t, "zFSec2XVAw1qbBFm7rFFV81U8UwGqBLuV7SGze8vPyQbziy7zbku", state.Head().String())
@@ -51,7 +51,7 @@ func TestBinaryCell(t *T) {
 	body, err := cells.Marshal(state.Root())
 	assert.Equal(t, genesisEnc, base32check.EncodeToString(body))
 
-	state, err = state.Next(cells.Ops(allocOp))
+	state, err = state.Next(cells.Root(allocOp))
 	assert.Equal(t, nil, err)
 	assert.Equal(t, uint64(1), state.Height())
 	assert.Equal(t, head, state.Prev().String())
@@ -62,7 +62,7 @@ func TestBinaryCell(t *T) {
 	body, err = cells.Marshal(state.Root())
 	assert.Equal(t, allocEnc, base32check.EncodeToString(body))
 
-	state, err = state.Next(cells.Ops(allocOp))
+	state, err = state.Next(cells.Root(allocOp))
 	assert.Equal(t, nil, err)
 	assert.Equal(t, uint64(2), state.Height())
 	assert.Equal(t, head, state.Prev().String())
