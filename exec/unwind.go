@@ -25,18 +25,16 @@ func Unwind(state State) (State, error) {
 	c := state.Op()
 	switch c.OpCode() {
 	case chainops.OpRoot:
-		res := chainops.NewRoot()
 		count := c.ChildrenSize()
 		for index := 0; index < count; index++ {
 			cell := c.ExecChild(index)
 			exec := state.WithOp(cell)
-			rc, err := Unwind(exec)
+			_, err := Unwind(exec)
 			if err != nil {
 				return nil, err
 			}
-			res.AddChildren(rc.Op())
 		}
-		return state.WithOp(NewCell(c.Context(), c, res)), nil
+		return state, nil
 	case chainops.OpSigned:
 		return signedOp(state)
 	case chainops.OpAssignPower:
