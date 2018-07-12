@@ -27,7 +27,7 @@ import (
 
 // assignOp - Assign power to public key hash or another address.
 // It's only possible to assign power in genesis block.
-func assignOp(state State) (res State, err error) {
+func assignOp(state State) (State, error) {
 	if state.Op().ChildrenSize() != 2 {
 		return nil, errors.New("AssignOp: two arguments are required")
 	}
@@ -36,11 +36,11 @@ func assignOp(state State) (res State, err error) {
 	}
 	quantity, err := uint64Op(state.Op().Child(0))
 	if err != nil {
-		return
+		return nil, err
 	}
 	assignee, err := cidOp(state.Op().Child(1))
 	if err != nil {
-		return
+		return nil, err
 	}
 	logger.Debugw("Assign Operation", "op", state.Op())
 	state.Store().Set(assignee, quantity)
@@ -48,7 +48,7 @@ func assignOp(state State) (res State, err error) {
 }
 
 // delegateOp - Delegates power.
-func delegateOp(state State) (res State, err error) {
+func delegateOp(state State) (State, error) {
 	// TODO: will change on delegation to others
 	if state.Op().ChildrenSize() != 1 && state.Op().ChildrenSize() != 2 {
 		return nil, errors.New("DelegateOp: two arguments are required")
@@ -59,7 +59,7 @@ func delegateOp(state State) (res State, err error) {
 	}
 	quantity, err := uint64Op(state.Op().Child(0))
 	if err != nil {
-		return
+		return nil, err
 	}
 	// TODO: currently only self-delegation is possible and allowed
 	if state.Op().ChildrenSize() == 2 && state.Op().Child(1).OpCode() != chainops.OpNonce {
@@ -84,14 +84,14 @@ type ctxKey string
 const pkCtxKey ctxKey = "btcec.PublicKey"
 
 // signatureOp - Verifies signature of parent operation.
-func signatureOp(state State) (res State, err error) {
+func signatureOp(state State) (State, error) {
 	if state.Op().Parent().OpCode() != chainops.OpSigned {
 		return nil, errors.New("SignatureOp: not child of signed op")
 	}
 	hash := state.Op().Parent().Child(0).CID().Bytes()
 	// verifies if signature is not malformed and recovers public key
 	sig := state.Op().Memory()
-	pk, _, err := btcec.RecoverCompact(btcec.S256(), sig, hash[6:])
+	pk, _, err := btcec.RecoverCompact(btcec.S256(), sig, hash[:32])
 	if err != nil {
 		return nil, fmt.Errorf("SignatureOp: signature malformed: %v", err)
 	}
@@ -104,7 +104,7 @@ func signatureOp(state State) (res State, err error) {
 }
 
 // signedOp - Performs signature-verified operation.
-func signedOp(state State) (res State, err error) {
+func signedOp(state State) (State, error) {
 	// TODO(crackcomm): implement multisig
 	if state.Op().ChildrenSize() > 2 {
 		return nil, errors.New("SignedOp: multisig not implemented")
@@ -122,7 +122,7 @@ func signedOp(state State) (res State, err error) {
 	// it needs to verify against operation to execute
 	sigState, err := signatureOp(state.WithOp(sigOp))
 	if err != nil {
-		return
+		return nil, err
 	}
 	// operation to execute
 	signedContext := sigState.Op().Context()
