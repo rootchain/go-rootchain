@@ -134,6 +134,9 @@ type stateJSON struct {
 
 // MarshalJSON - Marshals state to JSON.
 func (block *Block) MarshalJSON() ([]byte, error) {
+	if err := block.calcHeader(); err != nil {
+		return nil, err
+	}
 	return json.Marshal(stateJSON{
 		BlockHeader: block.header,
 		ExecOps:     cells.NewChildrenPrinter(block.opsRoot),
@@ -149,13 +152,20 @@ func (block *Block) reset() {
 }
 
 func (block *Block) calcHeader() (err error) {
-	if err := block.header.calcHead(); err != nil {
-		return err
+	if block.header.Head == nil {
+		if err := block.header.SetExec(block.opsRoot.CID()); err != nil {
+			return err
+		}
 	}
-	body, err := block.sigRoot.Marshal()
-	if err != nil {
-		return
+	if block.header.Signed == nil && len(block.signatures) > 0 {
+		body, err := block.sigRoot.Marshal()
+		if err != nil {
+			return err
+		}
+		block.header.Signed, err = cells.SumCID(SignedPrefix, body)
+		if err != nil {
+			return err
+		}
 	}
-	block.header.Signed, err = cells.SumCID(SignedPrefix, body)
 	return
 }
