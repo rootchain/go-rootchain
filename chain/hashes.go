@@ -18,10 +18,7 @@ import (
 	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
 	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
 
-	"github.com/ipfn/go-ipfn-cells"
-	"github.com/rootchain/go-rootchain/dev/chainops"
 	"github.com/rootchain/go-rootchain/dev/contents"
-	"github.com/rootchain/go-rootchain/dev/synaptic"
 )
 
 var (
@@ -49,23 +46,3 @@ var (
 		MhLength: 32,
 	}
 )
-
-// NewHeadCID - Computes header cid.
-func NewHeadCID(hdr *BlockHeader) (_ *cells.CID, err error) {
-	body, err := hdr.Cell().Marshal()
-	if err != nil {
-		return
-	}
-	return cells.SumCID(HeaderPrefix, body)
-}
-
-// Cell - Creates header binary cell.
-func (hdr *BlockHeader) Cell() *cells.BinaryCell {
-	return cells.Op(chainops.OpHeader,
-		synaptic.Uint64(hdr.Height),
-		synaptic.Uint64(uint64(hdr.Time.Unix())),
-		chainops.NewCID(hdr.Prev),
-		chainops.NewCID(hdr.Exec),
-		chainops.NewCID(hdr.State),
-	)
-}

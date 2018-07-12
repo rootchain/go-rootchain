@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/ipfn/go-ipfn-cells"
 	"github.com/rootchain/go-rootchain/dev/chainops"
@@ -100,6 +101,11 @@ func (block *Block) IsGenesis() bool {
 	return block.Height() == 0
 }
 
+// SetStateHash - Sets state hash. Resets head hash.
+func (block *Block) SetStateHash(c *cells.CID) {
+	block.header.SetStateHash(c)
+}
+
 // Next - Returns next state including given ops.
 func (block *Block) Next(root cells.MutableCell) (*Block, error) {
 	if root.ChildrenSize() == 0 {
@@ -111,11 +117,7 @@ func (block *Block) Next(root cells.MutableCell) (*Block, error) {
 // Sign - Signs state with given private key.
 // Computes new signed header hash.
 func (block *Block) Sign(key *btcec.PrivateKey) (_ cells.Cell, err error) {
-	if block.header.Head == nil {
-		if err := block.header.calcHead(); err != nil {
-			return nil, err
-		}
-	}
+	block.header.EnsureHead()
 	sigOp, err := chainops.SignBytes(block.Head().Bytes(), key)
 	if err != nil {
 		return
@@ -145,6 +147,7 @@ func (block *Block) MarshalJSON() ([]byte, error) {
 }
 
 func (block *Block) reset() {
+	block.header.Time = time.Now()
 	block.header.Head = nil
 	block.header.Exec = nil
 	block.header.Signed = nil
@@ -153,9 +156,7 @@ func (block *Block) reset() {
 
 func (block *Block) calcHeader() (err error) {
 	if block.header.Head == nil {
-		if err := block.header.SetExec(block.opsRoot.CID()); err != nil {
-			return err
-		}
+		block.header.SetExecHash(block.opsRoot.CID())
 	}
 	if block.header.Signed == nil && len(block.signatures) > 0 {
 		body, err := block.sigRoot.Marshal()

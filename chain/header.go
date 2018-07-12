@@ -15,8 +15,11 @@
 package chain
 
 import (
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/rootchain/go-rootchain/dev/chainops"
 
 	"github.com/ipfn/go-ipfn-cells"
 )
@@ -50,31 +53,45 @@ func NewBlockHeader(index uint64, prevHash *cells.CID, execCID *cells.CID) (hdr 
 	if prevHash == nil && index > 0 {
 		return nil, fmt.Errorf("prev hash cannot be empty with index %d", index)
 	}
-	hdr = &BlockHeader{
+	return &BlockHeader{
 		Height: index,
 		Time:   time.Now(),
 		Prev:   prevHash,
-	}
-	err = hdr.SetExec(execCID)
-	if err != nil {
-		return
-	}
-	// BUG(crackcomm): fucking state trie hash?!
-	hdr.State, err = cells.SumCID(StateTriePrefix, hdr.Head.Bytes())
-	if err != nil {
-		return
-	}
-	return
+		Exec:   execCID,
+	}, nil
 }
 
-// SetExec - Sets exec and head hash.
-func (hdr *BlockHeader) SetExec(c *cells.CID) error {
+// SetExecHash - Sets exec hash. Resets exec, state and head hash.
+func (hdr *BlockHeader) SetExecHash(c *cells.CID) {
 	hdr.Exec = c
+	hdr.State = nil
+	hdr.Head = nil
 	hdr.Signed = nil
-	return hdr.calcHead()
 }
 
-func (hdr *BlockHeader) calcHead() (err error) {
-	hdr.Head, err = NewHeadCID(hdr)
-	return
+// SetStateHash - Sets state hash. Resets head hash.
+func (hdr *BlockHeader) SetStateHash(c *cells.CID) {
+	hdr.Head = nil
+	hdr.State = c
+	hdr.Signed = nil
+}
+
+// EnsureHead - Calculates head.
+func (hdr *BlockHeader) EnsureHead() error {
+	if hdr.Height != 0 && hdr.Prev == nil {
+		return errors.New("cannot compute head w/o prev hash")
+	}
+	if hdr.Exec == nil {
+		return errors.New("cannot compute head w/o exec hash")
+	}
+	if hdr.Exec == nil {
+		return errors.New("cannot compute head w/o state hash")
+	}
+	if hdr.Time.IsZero() {
+		return errors.New("cannot compute head w/o timestamp")
+	}
+	if hdr.Head == nil {
+		hdr.Head = chainops.NewHeader(hdr.Height, hdr.Prev, hdr.Exec, hdr.State, hdr.Time).CID()
+	}
+	return nil
 }
