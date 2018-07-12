@@ -16,16 +16,19 @@ package exec
 
 import (
 	cells "github.com/ipfn/go-ipfn-cells"
+	"github.com/ipfn/go-ipfn-cmd-util/logger"
 )
 
 // Store - Execution store.
 type Store interface {
+	// Total - Total power.
+	Total() uint64
 	// Get - Gets value under key.
 	Get(key *cells.CID) uint64
 	// Set - Sets value under key.
 	Set(key *cells.CID, value uint64)
-	// Total - Gets total amount stored.
-	Total() uint64
+	// Clone - Clones store.
+	Clone() Store
 }
 
 // NewStore - Creates new mutable execution store.
@@ -34,23 +37,41 @@ func NewStore() Store {
 }
 
 type execStore struct {
-	root  *Store
+	root  *execStore
 	maps  map[string]uint64
 	total uint64
 }
 
 func (s *execStore) Get(key *cells.CID) uint64 {
-	return s.maps[key.String()]
+	return s.get(key.String())
 }
 
 func (s *execStore) Set(key *cells.CID, value uint64) {
-	cid := key.String()
-	prev := s.maps[cid]
-	s.total += value - prev
-	s.maps[cid] = value
-	// logger.Infow("Store Set", "key", key, "value", value, "total", s.total, "prev", prev)
+	s.set(key.String(), value)
 }
 
 func (s *execStore) Total() uint64 {
 	return s.total
+}
+
+func (s *execStore) Clone() Store {
+	return &execStore{root: s, total: s.total, maps: make(map[string]uint64)}
+}
+
+func (s *execStore) set(cid string, value uint64) {
+	prev := s.get(cid)
+	s.total += value - prev
+	s.maps[cid] = value
+	logger.Infow("Store Set", "key", cid, "value", value, "total", s.total, "prev", prev)
+}
+
+func (s *execStore) get(key string) uint64 {
+	// todo: make sure zero-ing doesnt mess-up `ok` value
+	if value, ok := s.maps[key]; ok {
+		return value
+	}
+	if s.root == nil {
+		return 0
+	}
+	return s.root.get(key)
 }
