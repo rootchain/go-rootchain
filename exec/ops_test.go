@@ -25,6 +25,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	logger.Disable()
+}
+
 func TestAssignOp(t *T) {
 	w := wallet.NewDefault()
 	state := initState(w)
@@ -58,6 +62,33 @@ func TestDelegateOp(t *T) {
 	state, err = Unwind(state)
 	assert.Equal(t, "DelegateOp: balance 0 is not enough to delegate 2", err.Error())
 }
+func BenchmarkDelegateOp(b *B) {
+	b.StopTimer()
+	w := wallet.NewDefault()
+	state := initState(w)
+	_, err := Unwind(state)
+	if err != nil {
+		b.Fatal(err)
+	}
+	key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/third"))
+	privKey, err := key.ECPrivKey()
+	if err != nil {
+		b.Fatal(err)
+	}
+	delegateOp := chainops.NewDelegatePower(0, 1e6)
+	signedOp, err := chainops.NewSignOperation(delegateOp, privKey)
+	if err != nil {
+		b.Fatal(err)
+	}
+	state, _ = NextState(state, chainops.NewRoot(signedOp))
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := Unwind(state)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
 
 func newSignedOp(w *wallet.Wallet) (_ *cells.BinaryCell, err error) {
 	key, err := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/signed-op-test"))
@@ -78,27 +109,13 @@ func initState(w *wallet.Wallet) State {
 	if err != nil {
 		panic(err)
 	}
-
 	config := &genesis.Config{Wallet: w}
-
-	assignPaths := []string{
-		"default/x/first:1e6:1e6",
-		"default/x/second:1e6:1e6",
-		"default/x/third:1e6:0",
-	}
-
-	for _, path := range assignPaths {
-		power, err := genesis.ParsePowerString(path)
-		if err != nil {
-			panic(err)
-		}
-		config.Assign(power)
-	}
-
+	config.Assign(genesis.MustParsePowerString("default/x/first:1e6:1e6"))
+	config.Assign(genesis.MustParsePowerString("default/x/second:1e6:1e6"))
+	config.Assign(genesis.MustParsePowerString("default/x/third:1e6:0"))
 	head, err := genesis.Init(config)
 	if err != nil {
 		panic(err)
 	}
-
 	return NewState(NewStore(), head)
 }
