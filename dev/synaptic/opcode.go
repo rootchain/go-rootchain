@@ -29,7 +29,7 @@ const (
 	// OpBigInt - Synaptic big int cells.
 	OpBigInt = OpOffset + 4
 	// OpString - Synaptic string cells.
-	// Different only in pretty printing.
+	// Different from bytes only in debug situations.
 	OpString = OpOffset + 5
 )
 

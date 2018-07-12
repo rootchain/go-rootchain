@@ -52,10 +52,10 @@ func ParseBigInt(str string) (_ *cells.BinaryCell, err error) {
 }
 
 // MustParseBigInt - Creates new big int cell from string.
-func MustParseBigInt(str string) (c *cells.BinaryCell) {
+func MustParseBigInt(str string) *cells.BinaryCell {
 	c, err := ParseBigInt(str)
 	if err != nil {
 		panic(err)
 	}
-	return
+	return c
 }
