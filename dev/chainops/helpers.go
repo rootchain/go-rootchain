@@ -39,7 +39,7 @@ func NewCID(c *cells.CID) *cells.BinaryCell {
 
 // NewSignOperation - Signs binary cell and creates signed operation.
 func NewSignOperation(op *cells.BinaryCell, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
-	hash := op.CID().Bytes()[:32]
+	hash := op.CID().Digest()
 	if size := len(hash); size != 32 {
 		return nil, fmt.Errorf("invalid hash length %d", size)
 	}

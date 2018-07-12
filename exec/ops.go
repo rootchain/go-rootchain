@@ -88,10 +88,10 @@ func signatureOp(state State) (State, error) {
 	if state.Op().Parent().OpCode() != chainops.OpSigned {
 		return nil, errors.New("SignatureOp: not child of signed op")
 	}
-	hash := state.Op().Parent().Child(0).CID().Bytes()
+	hash := state.Op().Parent().Child(0).CID().Digest()
 	// verifies if signature is not malformed and recovers public key
 	sig := state.Op().Memory()
-	pk, _, err := btcec.RecoverCompact(btcec.S256(), sig, hash[:32])
+	pk, _, err := btcec.RecoverCompact(btcec.S256(), sig, hash)
 	if err != nil {
 		return nil, fmt.Errorf("SignatureOp: signature malformed: %v", err)
 	}
