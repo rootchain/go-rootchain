@@ -61,6 +61,9 @@ const (
 
 	// OpTransfer - Transfer of an asset.
 	OpTransfer = OpRoot + 14
+
+	// OpNoop - Signalizes operation finish.
+	OpNoop = OpRoot + 15
 )
 
 func init() {
@@ -79,4 +82,5 @@ func init() {
 	cells.Register(OpClaim, "claim")
 	cells.Register(OpTransfer, "transfer")
 	cells.Register(OpNonce, "nonce")
+	cells.Register(OpNoop, "noop")
 }
