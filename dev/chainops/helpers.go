@@ -16,6 +16,7 @@ package chainops
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/ipfn/go-ipfn-cells"
@@ -38,7 +39,7 @@ func NewCID(c *cells.CID) *cells.BinaryCell {
 
 // NewSignOperation - Signs binary cell and creates signed operation.
 func NewSignOperation(op *cells.BinaryCell, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
-	hash := op.CID().Bytes()[6:]
+	hash := op.CID().Bytes()[:32]
 	if size := len(hash); size != 32 {
 		return nil, fmt.Errorf("invalid hash length %d", size)
 	}
@@ -114,4 +115,16 @@ func NewPubkeyToAddr(bytes []byte) *cells.BinaryCell {
 // NewNonce - Creates new uint64 cell.
 func NewNonce(nonce cells.ID) *cells.BinaryCell {
 	return cells.New(OpNonce, nonce.Bytes())
+}
+
+// NewHeader - Creates new header cell.
+// Following format is used: `[height][prev-hash][exec-hash][state-hash][timestamp]`.
+func NewHeader(height uint64, prev, exec, state *cells.CID, t time.Time) *cells.BinaryCell {
+	return cells.Op(OpHeader,
+		synaptic.Uint64(height),
+		NewCID(prev),
+		NewCID(exec),
+		NewCID(state),
+		synaptic.Uint64(uint64(t.Unix())),
+	)
 }
