@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec"
-	cells "github.com/ipfn/go-ipfn-cells"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 	keypair "github.com/ipfn/go-ipfn-keypair"
 	"github.com/rootchain/go-rootchain/dev/chainops"
@@ -77,8 +76,7 @@ func delegateOp(state State) (res State, err error) {
 	if quantity > balance {
 		return nil, fmt.Errorf("DelegateOp: balance %d is not enough to delegate %d", balance, quantity)
 	}
-	op := NewCell(state.Op().Context(), state.Op(), cells.Op(chainops.OpDone))
-	return state.WithOp(op), nil
+	return state, nil
 }
 
 type ctxKey string
