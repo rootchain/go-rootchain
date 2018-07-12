@@ -36,7 +36,6 @@ func Init(config *Config) (block *chain.Block, err error) {
 		delegateOps []cells.Cell
 	)
 	// derive private keys for all key paths
-	var nonce cells.ID
 	for _, dest := range config.Power {
 		key, err := config.Wallet.UnlockedDerive(dest.WalletKeyPath)
 		if err != nil {
@@ -51,14 +50,13 @@ func Init(config *Config) (block *chain.Block, err error) {
 			return nil, err
 		}
 		if dest.DelegateQuantity > 0 {
-			delegateOp := chainops.NewDelegatePower(nonce, dest.DelegateQuantity)
+			delegateOp := chainops.NewDelegatePower(0, dest.DelegateQuantity)
 			signedOp, err := chainops.NewSignOperation(delegateOp, privKey)
 			if err != nil {
 				return nil, err
 			}
 			privKeys = append(privKeys, privKey)
 			delegateOps = append(delegateOps, signedOp)
-			nonce++
 		}
 		assignOps = append(assignOps, chainops.NewAssignPower(0, dest.AssignQuantity, addr))
 	}
