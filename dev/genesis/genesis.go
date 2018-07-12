@@ -25,7 +25,7 @@ import (
 )
 
 // Init - Initializes a new chain.
-func Init(config *Config) (state *chain.State, err error) {
+func Init(config *Config) (block *chain.Block, err error) {
 	// set default wallet if empty
 	if config.Wallet == nil {
 		config.Wallet = wallet.NewDefault()
@@ -51,8 +51,8 @@ func Init(config *Config) (state *chain.State, err error) {
 			return nil, err
 		}
 		if dest.DelegateQuantity > 0 {
-			delegateOp := chainops.DelegatePower(nonce, dest.DelegateQuantity)
-			signedOp, err := chainops.Sign(delegateOp, privKey)
+			delegateOp := chainops.NewDelegatePower(nonce, dest.DelegateQuantity)
+			signedOp, err := chainops.NewSignOperation(delegateOp, privKey)
 			if err != nil {
 				return nil, err
 			}
@@ -60,20 +60,20 @@ func Init(config *Config) (state *chain.State, err error) {
 			delegateOps = append(delegateOps, signedOp)
 			nonce++
 		}
-		assignOps = append(assignOps, chainops.AssignPower(0, dest.AssignQuantity, addr))
+		assignOps = append(assignOps, chainops.NewAssignPower(0, dest.AssignQuantity, addr))
 	}
 	// chain exec root op
-	root := chainops.Root()
+	root := chainops.NewRoot()
 	root.AddChildren(assignOps...)
 	root.AddChildren(delegateOps...)
-	// initialize state
-	state, err = chain.NewState(0, nil, root)
+	// initialize block
+	block, err = chain.NewBlock(0, nil, root)
 	if err != nil {
 		return nil, err
 	}
-	// sign state with private keys
+	// sign block with private keys
 	for _, key := range privKeys {
-		if _, err := state.Sign(key); err != nil {
+		if _, err := block.Sign(key); err != nil {
 			return nil, err
 		}
 	}
