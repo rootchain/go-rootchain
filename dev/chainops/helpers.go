@@ -69,13 +69,10 @@ func Multihash(mh multihash.Multihash) *cells.BinaryCell {
 	return cells.New(OpMultihash, []byte(mh))
 }
 
-// Sign - Signs binary cell and creates signed operation.
-func Sign(op *cells.BinaryCell, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
-	body, err := cells.Marshal(op)
-	if err != nil {
-		return
-	}
-	sig, err := SignBytes(body, pk)
+// SignOperation - Signs binary cell and creates signed operation.
+func SignOperation(op *cells.BinaryCell, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
+	hash := op.CID().Bytes()
+	sig, err := SignBytes(hash, pk)
 	if err != nil {
 		return
 	}
