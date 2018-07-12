@@ -40,7 +40,7 @@ type Cell interface {
 
 // NewRoot - Creates new root exec cell.
 func NewRoot(ctx context.Context, cell cells.Cell) Cell {
-	return &execCell{Cell: cell, ctx: ctx}
+	return &execCell{Cell: cell, ctx: ctx, parent: chainops.NewRoot(cell)}
 }
 
 // NewCell - Creates new exec cell.
@@ -55,20 +55,11 @@ type execCell struct {
 }
 
 func (c *execCell) Parent() cells.Cell {
-	if c.parent == nil {
-		return chainops.Root(c.Cell)
-	}
 	return c.parent
 }
 
 func (c *execCell) ExecChild(n int) Cell {
-	child := c.Cell.Child(n)
-	switch v := child.(type) {
-	case *execCell:
-		return v
-	default:
-		return NewCell(c.ctx, c.parent, child)
-	}
+	return NewCell(c.Context(), c, c.Cell.Child(n))
 }
 
 func (c *execCell) Context() context.Context {

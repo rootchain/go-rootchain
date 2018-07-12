@@ -14,15 +14,20 @@
 
 package exec
 
-import "github.com/rootchain/go-rootchain/chain"
+import (
+	"context"
+
+	cells "github.com/ipfn/go-ipfn-cells"
+	"github.com/rootchain/go-rootchain/chain"
+)
 
 // State - Execution stack context.
 type State interface {
 	// Op - Execution cell.
 	Op() Cell
 
-	// Head - Chain head state.
-	Head() *chain.State
+	// Block - Chain block.
+	Block() *chain.Block
 
 	// Store - Execution state.
 	Store() Store
@@ -32,22 +37,32 @@ type State interface {
 }
 
 // NewState - Creates new execution state.
-func NewState(head *chain.State, store Store, op Cell) State {
-	return &execState{op: op, head: head, store: store}
+func NewState(store Store, block *chain.Block) State {
+	op := NewRoot(context.TODO(), block.Root())
+	return &execState{op: op, block: block, store: store}
+}
+
+// NextState - Creates state for next block from prev state and exec root.
+func NextState(state State, execRoot cells.MutableCell) (State, error) {
+	block, err := state.Block().Next(execRoot)
+	if err != nil {
+		return nil, err
+	}
+	return NewState(state.Store(), block), nil
 }
 
 type execState struct {
 	op    Cell
-	head  *chain.State
 	store Store
+	block *chain.Block
 }
 
 func (s *execState) Op() Cell {
 	return s.op
 }
 
-func (s *execState) Head() *chain.State {
-	return s.head
+func (s *execState) Block() *chain.Block {
+	return s.block
 }
 
 func (s *execState) Store() Store {
@@ -55,5 +70,5 @@ func (s *execState) Store() Store {
 }
 
 func (s *execState) WithOp(op Cell) State {
-	return NewState(s.head, s.store, op)
+	return &execState{op: op, block: s.block, store: s.store}
 }

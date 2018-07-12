@@ -16,24 +16,41 @@ package exec
 
 import (
 	cells "github.com/ipfn/go-ipfn-cells"
-	"github.com/ipfn/go-ipfn-cmd-util/logger"
 )
 
 // Store - Execution store.
 type Store interface {
+	// Get - Gets value under key.
+	Get(key *cells.CID) uint64
 	// Set - Sets value under key.
 	Set(key *cells.CID, value uint64)
+	// Total - Gets total amount stored.
+	Total() uint64
 }
 
 // NewStore - Creates new mutable execution store.
 func NewStore() Store {
-	return &execStore{}
+	return &execStore{maps: make(map[string]uint64)}
 }
 
 type execStore struct {
-	root *Store
+	root  *Store
+	maps  map[string]uint64
+	total uint64
+}
+
+func (s *execStore) Get(key *cells.CID) uint64 {
+	return s.maps[key.String()]
 }
 
 func (s *execStore) Set(key *cells.CID, value uint64) {
-	logger.Infow("Store Set", "key", key, "value", value)
+	cid := key.String()
+	prev := s.maps[cid]
+	s.total += value - prev
+	s.maps[cid] = value
+	// logger.Infow("Store Set", "key", key, "value", value, "total", s.total, "prev", prev)
+}
+
+func (s *execStore) Total() uint64 {
+	return s.total
 }

@@ -25,10 +25,12 @@ func Unwind(state State) (State, error) {
 	c := state.Op()
 	switch c.OpCode() {
 	case chainops.OpRoot:
-		res := chainops.Root()
+		res := chainops.NewRoot()
 		count := c.ChildrenSize()
 		for index := 0; index < count; index++ {
-			rc, err := Unwind(state.WithOp(c.ExecChild(index)))
+			cell := c.ExecChild(index)
+			exec := state.WithOp(cell)
+			rc, err := Unwind(exec)
 			if err != nil {
 				return nil, err
 			}

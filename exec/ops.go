@@ -24,13 +24,16 @@ import (
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 	keypair "github.com/ipfn/go-ipfn-keypair"
 	"github.com/rootchain/go-rootchain/dev/chainops"
-	"github.com/rootchain/go-rootchain/dev/synaptic"
 )
 
-// assignOp - Assign power.
+// assignOp - Assign power to public key hash or another address.
+// It's only possible to assign power in genesis block.
 func assignOp(state State) (res State, err error) {
-	if !state.Head().IsGenesis() {
-		return nil, errors.New("cannot assign on non-zero height")
+	if state.Op().ChildrenSize() != 2 {
+		return nil, errors.New("AssignOp: two arguments are required")
+	}
+	if !state.Block().IsGenesis() {
+		return nil, errors.New("AssignOp: cannot assign on non-zero height")
 	}
 	quantity, err := uint64Op(state.Op().Child(0))
 	if err != nil {
@@ -40,37 +43,41 @@ func assignOp(state State) (res State, err error) {
 	if err != nil {
 		return
 	}
+	logger.Debugw("Assign Operation", "op", state.Op())
 	state.Store().Set(assignee, quantity)
-	logger.Infow("Assign Operation", "op", state.Op())
 	return state, nil
 }
 
 // delegateOp - Delegates power.
 func delegateOp(state State) (res State, err error) {
-	if state.Op().ChildrenSize() == 0 {
-		return nil, errors.New("DelegateOp: no children")
+	// TODO: will change on delegation to others
+	if state.Op().ChildrenSize() != 1 && state.Op().ChildrenSize() != 2 {
+		return nil, errors.New("DelegateOp: two arguments are required")
 	}
 	pk, ok := state.Op().Context().Value(pkCtxKey).(*btcec.PublicKey)
 	if !ok {
 		return nil, errors.New("DelegateOp: no signature")
 	}
-	// TODO: currently only self-delegation is possible and allowed
-	// if state.Op().ChildrenSize() == 1 || state.Op().Child(1).OpCode() == chainops.OpNonce {
-	// }
 	quantity, err := uint64Op(state.Op().Child(0))
 	if err != nil {
 		return
 	}
-	logger.Infow("Delegate Power Operation",
-		"cid", keypair.CID(pk).String(),
+	// TODO: currently only self-delegation is possible and allowed
+	if state.Op().ChildrenSize() == 2 && state.Op().Child(1).OpCode() != chainops.OpNonce {
+		return nil, errors.New("DelegateOp: second argument is not nonce")
+	}
+	addr := keypair.CID(pk)
+	balance := state.Store().Get(addr)
+	logger.Debugw("Delegate Power Operation",
+		"source", addr.String(),
 		"quantity", quantity,
+		"balance", balance,
+		"valid", quantity <= balance,
 	)
-
-	op := NewCell(state.Op().Context(), state.Op(), cells.Op(chainops.OpTransfer,
-		chainops.Pubkey(pk),
-		synaptic.String("key"),
-		synaptic.String("value"),
-	))
+	if quantity > balance {
+		return nil, fmt.Errorf("DelegateOp: balance %d is not enough to delegate %d", balance, quantity)
+	}
+	op := NewCell(state.Op().Context(), state.Op(), cells.Op(chainops.OpDone))
 	return state.WithOp(op), nil
 }
 
@@ -80,17 +87,22 @@ const pkCtxKey ctxKey = "btcec.PublicKey"
 
 // signatureOp - Verifies signature of parent operation.
 func signatureOp(state State) (res State, err error) {
-	cid := state.Op().Parent().Child(0).CID().Bytes()
-	sigOp := state.Op().Memory()
-	// verifies signature and recovers public key
-	pk, _, err := btcec.RecoverCompact(btcec.S256(), sigOp, cid)
+	if state.Op().Parent().OpCode() != chainops.OpSigned {
+		return nil, errors.New("SignatureOp: not child of signed op")
+	}
+	hash := state.Op().Parent().Child(0).CID().Bytes()
+	// verifies if signature is not malformed and recovers public key
+	sig := state.Op().Memory()
+	pk, _, err := btcec.RecoverCompact(btcec.S256(), sig, hash[6:])
 	if err != nil {
-		return nil, fmt.Errorf("SignatureOp: invalid signature: %v", err)
+		return nil, fmt.Errorf("SignatureOp: signature malformed: %v", err)
 	}
 	// set public key in context
 	// TODO: measure impact of this and make sure it doesn't leak
 	ctx := context.WithValue(state.Op().Context(), pkCtxKey, pk)
-	return state.WithOp(NewCell(ctx, state.Op(), chainops.Pubkey(pk))), nil
+	// TODO: we do not need outputs out in here
+	cell := NewCell(ctx, state.Op(), chainops.NewPubkey(pk))
+	return state.WithOp(cell), nil
 }
 
 // signedOp - Performs signature-verified operation.
@@ -105,12 +117,13 @@ func signedOp(state State) (res State, err error) {
 	// signature to verify
 	sigOp := state.Op().ExecChild(1)
 	// execute signature op
-	sigStack, err := signatureOp(state.WithOp(sigOp))
+	// it needs to verify against operation to execute
+	sigState, err := signatureOp(state.WithOp(sigOp))
 	if err != nil {
 		return
 	}
 	// operation to execute
-	execOp := state.Op().ExecChild(0)
-	ctx := sigStack.Op().Context()
-	return Unwind(state.WithOp(execOp.WithContext(ctx)))
+	signedContext := sigState.Op().Context()
+	signedExecOp := state.Op().ExecChild(0).WithContext(signedContext)
+	return Unwind(state.WithOp(signedExecOp))
 }
