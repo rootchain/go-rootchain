@@ -15,14 +15,44 @@
 package chain
 
 import (
+	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
+	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
+
 	"github.com/ipfn/go-ipfn-cells"
 	"github.com/rootchain/go-rootchain/dev/chainops"
+	"github.com/rootchain/go-rootchain/dev/contents"
 	"github.com/rootchain/go-rootchain/dev/synaptic"
 )
 
+var (
+	// HeaderPrefix - Header CID prefix.
+	HeaderPrefix = cid.Prefix{
+		Version:  1,
+		Codec:    contents.ChainHeader,
+		MhType:   mh.KECCAK_256,
+		MhLength: 32,
+	}
+
+	// SignedPrefix - Signed header CID prefix.
+	SignedPrefix = cid.Prefix{
+		Version:  1,
+		Codec:    contents.ChainSigned,
+		MhType:   mh.KECCAK_256,
+		MhLength: 32,
+	}
+
+	// StateTriePrefix - State trie CID prefix.
+	StateTriePrefix = cid.Prefix{
+		Version:  1,
+		Codec:    cid.EthStateTrie,
+		MhType:   mh.KECCAK_256,
+		MhLength: 32,
+	}
+)
+
 // NewHeadCID - Computes header cid.
-func NewHeadCID(hdr *Header) (_ *cells.CID, err error) {
-	body, err := cells.Marshal(hdr.Cell())
+func NewHeadCID(hdr *BlockHeader) (_ *cells.CID, err error) {
+	body, err := hdr.Cell().Marshal()
 	if err != nil {
 		return
 	}
@@ -30,11 +60,12 @@ func NewHeadCID(hdr *Header) (_ *cells.CID, err error) {
 }
 
 // Cell - Creates header binary cell.
-func (hdr *Header) Cell() *cells.BinaryCell {
+func (hdr *BlockHeader) Cell() *cells.BinaryCell {
 	return cells.Op(chainops.OpHeader,
 		synaptic.Uint64(hdr.Height),
 		synaptic.Uint64(uint64(hdr.Time.Unix())),
-		chainops.CID(hdr.Prev),
-		chainops.CID(hdr.Exec),
+		chainops.NewCID(hdr.Prev),
+		chainops.NewCID(hdr.Exec),
+		chainops.NewCID(hdr.State),
 	)
 }

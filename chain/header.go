@@ -21,21 +21,21 @@ import (
 	"github.com/ipfn/go-ipfn-cells"
 )
 
-// Header - State header structure.
-type Header struct {
-	// Height - State height.
+// BlockHeader - Block header structure.
+type BlockHeader struct {
+	// Height - Block height.
 	Height uint64 `json:"height,omitempty"`
 
-	// Time - State time.
+	// Time - Block time.
 	Time time.Time `json:"timestamp,omitempty"`
 
 	// Head - Head content ID.
 	Head *cells.CID `json:"head_hash,omitempty"`
 
-	// Prev - Previous state hash.
+	// Prev - Previous block head hash.
 	Prev *cells.CID `json:"prev_hash,omitempty"`
 
-	// Exec - State execution hash.
+	// Exec - Block execution hash.
 	Exec *cells.CID `json:"exec_hash,omitempty"`
 
 	// State - State trie hash.
@@ -45,25 +45,36 @@ type Header struct {
 	Signed *cells.CID `json:"signed_hash,omitempty"`
 }
 
-// NewHeader - Creates new state header structure.
-func NewHeader(index uint64, prevHash *cells.CID, execCID *cells.CID) (hdr *Header, err error) {
+// NewBlockHeader - Creates new state header structure.
+func NewBlockHeader(index uint64, prevHash *cells.CID, execCID *cells.CID) (hdr *BlockHeader, err error) {
 	if prevHash == nil && index > 0 {
 		return nil, fmt.Errorf("prev hash cannot be empty with index %d", index)
 	}
-	hdr = &Header{
+	hdr = &BlockHeader{
 		Height: index,
 		Time:   time.Now(),
-		Exec:   execCID,
 		Prev:   prevHash,
 	}
-	hdr.Head, err = NewHeadCID(hdr)
+	err = hdr.SetExec(execCID)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// BUG(crackcomm): fucking state trie hash?!
 	hdr.State, err = cells.SumCID(StateTriePrefix, hdr.Head.Bytes())
 	if err != nil {
 		return
 	}
+	return
+}
+
+// SetExec - Sets exec and head hash.
+func (hdr *BlockHeader) SetExec(c *cells.CID) error {
+	hdr.Exec = c
+	hdr.Signed = nil
+	return hdr.calcHead()
+}
+
+func (hdr *BlockHeader) calcHead() (err error) {
+	hdr.Head, err = NewHeadCID(hdr)
 	return
 }
