@@ -25,7 +25,6 @@ import (
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 	"github.com/ipfn/go-ipfn-keypair"
 	"github.com/ipfn/go-ipfn-wallet"
-	"github.com/rootchain/go-rootchain/dev/address"
 )
 
 var (
@@ -75,9 +74,7 @@ func HandleDeriveCmd(cmd *cobra.Command, args []string) (err error) {
 	if printInfo {
 		neuter, _ := acc.Neuter()
 		c, _ := acc.CID()
-		a := address.FromCID(c)
 		logger.Print()
-		logger.Printf("Short:       %s", a)
 		logger.Printf("Address:     %s", c)
 		logger.Printf("Public key:  %s", neuter)
 		logger.Printf("Private key: %s", acc.PrivateString())
