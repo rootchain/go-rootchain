@@ -32,24 +32,27 @@ func init() {
 func TestAssignOp(t *T) {
 	w := wallet.NewDefault()
 	state := initState(w)
-
-	key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/assign-op-test"))
-	c, _ := key.CID()
-
-	state, _ = NextState(state, chainops.NewRoot(
-		chainops.NewAssignPower(0, 1000, c),
-	))
-
-	_, err := Unwind(state)
-	assert.Equal(t, "AssignOp: cannot assign on non-zero height", err.Error())
+	assert.Equal(t, uint64(3e6), state.Store().Total())
+	{
+		key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/first"))
+		c, _ := key.CID()
+		assert.Equal(t, uint64(1e6), state.Store().Get(c))
+	}
+	{
+		key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/assign-op-test"))
+		c, _ := key.CID()
+		assert.Equal(t, uint64(0), state.Store().Get(c))
+		state, _ = NextState(state, chainops.NewRoot(
+			chainops.NewAssignPower(0, 1000, c),
+		))
+		_, err := Unwind(state)
+		assert.Equal(t, "AssignOp: cannot assign on non-zero height", err.Error())
+	}
 }
 
 func TestDelegateOp(t *T) {
 	w := wallet.NewDefault()
 	state := initState(w)
-
-	_, err := Unwind(state)
-	assert.Equal(t, nil, err)
 	assert.Equal(t, uint64(3e6), state.Store().Total())
 
 	// NOTE: this is hazardous it does not update exec hash but doesnt matter here
@@ -59,17 +62,14 @@ func TestDelegateOp(t *T) {
 		signedOp.Child(1),
 	})
 
-	state, err = Unwind(state)
+	state, err := Unwind(state)
 	assert.Equal(t, "DelegateOp: balance 0 is not enough to delegate 2", err.Error())
 }
+
 func BenchmarkDelegateOp(b *B) {
 	b.StopTimer()
 	w := wallet.NewDefault()
 	state := initState(w)
-	_, err := Unwind(state)
-	if err != nil {
-		b.Fatal(err)
-	}
 	key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/third"))
 	privKey, err := key.ECPrivKey()
 	if err != nil {
@@ -117,5 +117,10 @@ func initState(w *wallet.Wallet) State {
 	if err != nil {
 		panic(err)
 	}
-	return NewState(NewStore(), head)
+	state := NewState(NewStore(), head)
+	result, err := Unwind(state)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }
