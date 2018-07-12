@@ -100,9 +100,9 @@ func signatureOp(state State) (res State, err error) {
 	// set public key in context
 	// TODO: measure impact of this and make sure it doesn't leak
 	ctx := context.WithValue(state.Op().Context(), pkCtxKey, pk)
-	// TODO: we do not need outputs out in here
-	cell := NewCell(ctx, state.Op(), chainops.NewPubkey(pk))
-	return state.WithOp(cell), nil
+	// return public key cell
+	cell := chainops.NewPubkey(pk)
+	return state.WithOp(NewRoot(ctx, cell)), nil
 }
 
 // signedOp - Performs signature-verified operation.
@@ -116,6 +116,10 @@ func signedOp(state State) (res State, err error) {
 	}
 	// signature to verify
 	sigOp := state.Op().ExecChild(1)
+	// verify it's signature to explicitly execute it
+	if sigOp.OpCode() != chainops.OpSignature {
+		return nil, fmt.Errorf("SignedOp: expected a signature but got %s", sigOp.OpCode())
+	}
 	// execute signature op
 	// it needs to verify against operation to execute
 	sigState, err := signatureOp(state.WithOp(sigOp))
