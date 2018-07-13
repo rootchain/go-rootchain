@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,15 +25,16 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
+	wallet "github.com/ipfn/go-ipfn-wallet"
 
 	"github.com/rootchain/go-rootchain/cmd/chain"
 	"github.com/rootchain/go-rootchain/cmd/sign"
-	"github.com/rootchain/go-rootchain/cmd/wallet"
+	cmdwallet "github.com/rootchain/go-rootchain/cmd/wallet"
 )
 
 func init() {
 	RootCmd.AddCommand(chain.RootCmd)
-	RootCmd.AddCommand(wallet.RootCmd)
+	RootCmd.AddCommand(cmdwallet.RootCmd)
 	RootCmd.AddCommand(sign.SignCmd)
 	RootCmd.PersistentFlags().BoolVarP(&logger.Verbose, "verbose", "v", false, "verbose logs output (stdout/stderr)")
 }
@@ -81,6 +83,12 @@ func initConfig() {
 		// Search config in home directory with name ".rootchain" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".rootchain")
+
+		// Set default wallet path
+		if err := wallet.SetDefaultPath(filepath.Join(home, ".rootchain-wallet")); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
