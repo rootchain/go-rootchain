@@ -15,6 +15,7 @@
 package genesis
 
 import (
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/trie"
 	cells "github.com/ipfn/go-ipfn-cells"
 	wallet "github.com/ipfn/go-ipfn-wallet"
@@ -52,6 +53,9 @@ func (config *Config) WalletKeys() (keys []string) {
 }
 
 func (config *Config) unwind(block *chain.Block) (_ *cells.CID, err error) {
+	if config.Database == nil {
+		config.Database = trie.NewDatabase(ethdb.NewMemDatabase())
+	}
 	store, err := exec.NewStore(nil, config.Database)
 	if err != nil {
 		return
