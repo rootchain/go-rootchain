@@ -36,10 +36,13 @@ func init() {
 	RootCmd.AddCommand(chain.RootCmd)
 	RootCmd.AddCommand(cmdwallet.RootCmd)
 	RootCmd.AddCommand(sign.SignCmd)
-	RootCmd.PersistentFlags().BoolVarP(&logger.Verbose, "verbose", "v", false, "verbose logs output (stdout/stderr)")
+	RootCmd.PersistentFlags().BoolVarP(&verboseLog, "verbose", "v", false, "verbose logs output (stdout/stderr)")
 }
 
-var cfgFile string
+var (
+	cfgFile    string
+	verboseLog bool
+)
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -68,6 +71,12 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	// disable logger if not --verbose
+	if !verboseLog {
+		logger.Disable()
+	}
+
+	// find for configuration from --config flag
 	cfgFile, _ = homedir.Expand(cfgFile)
 	if cfgFile != "" {
 		// Use config file from the flag.
