@@ -2,10 +2,13 @@ language: go
 go: 
  - 1.9.2
 
-script:
+install:
  - go get -v -u github.com/whyrusleeping/gx
  - go get -v -u github.com/whyrusleeping/gx-go
  - gx -v && gx-go -v
  - gx install --global
  - go get github.com/stretchr/testify/assert
- - go test -v ./go/...
+ - go get -t -v ./...
+
+script:
+ - go test -v ./...
