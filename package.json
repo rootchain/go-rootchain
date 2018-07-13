@@ -1,0 +1,22 @@
+{
+  "author": "crackcomm",
+  "bugs": {
+    "url": "https://github.com/rootchain/go-rootchain/issues/new"
+  },
+  "gx": {},
+  "gxDependencies": [
+    {
+      "author": "whyrusleeping",
+      "hash": "QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB",
+      "name": "go-cid",
+      "version": "0.7.21"
+    }
+  ],
+  "gxVersion": "0.12.1",
+  "language": "go",
+  "license": "",
+  "name": "go-rootchain",
+  "releaseCmd": "git commit -a -m \"gx publish $VERSION\"",
+  "version": "0.0.0"
+}
+

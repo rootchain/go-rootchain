@@ -3,5 +3,9 @@ go:
  - 1.9.2
 
 script:
+ - go get -v -u github.com/whyrusleeping/gx
+ - go get -v -u github.com/whyrusleeping/gx-go
+ - gx -v && gx-go -v
+ - gx install --global
  - go get github.com/stretchr/testify/assert
  - go test -v ./go/...
