@@ -48,7 +48,11 @@ func NextState(state State, execRoot cells.MutableCell) (State, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewState(state.Store(), block), nil
+	store, err := state.Store().Clone()
+	if err != nil {
+		return nil, err
+	}
+	return NewState(store, block), nil
 }
 
 type execState struct {
