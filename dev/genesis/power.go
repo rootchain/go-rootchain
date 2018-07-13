@@ -52,7 +52,7 @@ func ParsePowerString(keyPath string) (res *Distribution, err error) {
 		return nil, fmt.Errorf("invalid key:power:delegated format: %q", keyPath)
 	}
 	res = new(Distribution)
-	if !strings.HasPrefix(split[0], "zFNSc") && !strings.Contains(split[0], "/") && len(split) == 2 {
+	if strings.HasPrefix(split[0], "zFNSc") && !strings.Contains(split[0], "/") && len(split) == 2 {
 		res.Address, err = cells.DecodeCID(split[0])
 	} else {
 		res.WalletKeyPath, err = wallet.ParseKeyPath(split[0])

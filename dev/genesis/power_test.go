@@ -17,6 +17,8 @@ package genesis
 import (
 	. "testing"
 
+	"github.com/ipfn/go-ipfn-cells"
+
 	wallet "github.com/ipfn/go-ipfn-wallet"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,6 +30,20 @@ func TestParsePowerString(t *T) {
 		WalletKeyPath:    wallet.MustParseKeyPath("default/x/first"),
 	}
 	parsed, err := ParsePowerString("default/x/first:1e6:1e6")
-	assert.Equal(t, nil, err)
+	assert.Empty(t, err)
 	assert.Equal(t, expected, parsed)
+}
+
+func TestParsePowerString_Address(t *T) {
+	addr, _ := cells.DecodeCID("zFNScYMHAiBJPJcT9ri2cNwKTJfitbRcE2PSfMKQj272C6A5Fs25")
+	expected := &Distribution{
+		AssignQuantity: 1e6,
+		Address:        addr,
+	}
+	parsed, err := ParsePowerString("zFNScYMHAiBJPJcT9ri2cNwKTJfitbRcE2PSfMKQj272C6A5Fs25:1e6")
+	assert.Empty(t, err)
+	assert.Empty(t, parsed.WalletKeyPath)
+	assert.Equal(t, expected.AssignQuantity, parsed.AssignQuantity)
+	assert.Equal(t, expected.DelegateQuantity, parsed.DelegateQuantity)
+	assert.Equal(t, expected.Address.String(), parsed.Address.String())
 }
