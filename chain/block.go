@@ -35,7 +35,7 @@ type Block struct {
 }
 
 // NewBlock - Creates new block structure.
-func NewBlock(index uint64, prevHash *cells.CID, opsRoot cells.MutableCell) (_ *Block, err error) {
+func NewBlock(index uint64, prevHash *cells.CID, opsRoot cells.MutableCell) (block *Block, err error) {
 	if opsRoot.OpCode() != chainops.OpRoot {
 		return nil, fmt.Errorf("invalid root opcode %s", opsRoot.OpCode())
 	}
@@ -47,12 +47,16 @@ func NewBlock(index uint64, prevHash *cells.CID, opsRoot cells.MutableCell) (_ *
 	if err != nil {
 		return
 	}
-	sigRoot := chainops.NewSigned(opsRoot)
-	return &Block{
+	block = &Block{
 		header:  header,
 		opsRoot: opsRoot,
-		sigRoot: sigRoot,
-	}, nil
+		sigRoot: cells.Op(chainops.OpSigned, opsRoot),
+	}
+	err = block.calcHeader()
+	if err != nil {
+		return
+	}
+	return
 }
 
 // Prev - Returns previous CID.
@@ -118,7 +122,7 @@ func (block *Block) Next(root cells.MutableCell) (*Block, error) {
 // Computes new signed header hash.
 func (block *Block) Sign(key *btcec.PrivateKey) (_ cells.Cell, err error) {
 	block.header.EnsureHead()
-	sigOp, err := chainops.SignBytes(block.Head().Bytes(), key)
+	sigOp, err := chainops.NewSignatureOp(block.Head().Bytes(), key)
 	if err != nil {
 		return
 	}
@@ -155,8 +159,13 @@ func (block *Block) reset() {
 }
 
 func (block *Block) calcHeader() (err error) {
-	if block.header.Head == nil {
+	if block.header.Exec == nil {
 		block.header.SetExecHash(block.opsRoot.CID())
+	}
+	if block.header.Head == nil {
+		if err := block.header.EnsureHead(); err != nil {
+			return err
+		}
 	}
 	if block.header.Signed == nil && len(block.signatures) > 0 {
 		body, err := block.sigRoot.Marshal()
