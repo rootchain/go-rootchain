@@ -99,7 +99,7 @@ func signatureOp(state State) (State, error) {
 	// TODO: measure impact of this and make sure it doesn't leak
 	ctx := context.WithValue(state.Op().Context(), pkCtxKey, pk)
 	// return public key cell
-	cell := chainops.NewPubkey(pk)
+	cell := chainops.NewPubkeyOp(pk)
 	return state.WithOp(NewRoot(ctx, cell)), nil
 }
 

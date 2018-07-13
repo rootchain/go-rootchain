@@ -42,8 +42,8 @@ func TestAssignOp(t *T) {
 		key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/assign-op-test"))
 		c, _ := key.CID()
 		assert.Equal(t, uint64(0), state.Store().Get(c))
-		state, _ = NextState(state, chainops.NewRoot(
-			chainops.NewAssignPower(0, 1000, c),
+		state, _ = NextState(state, chainops.NewRootOp(
+			chainops.NewAssignPowerOp(0, 1000, c),
 		))
 		_, err := Unwind(state)
 		assert.Equal(t, "AssignOp: cannot assign on non-zero height", err.Error())
@@ -58,7 +58,7 @@ func TestDelegateOp(t *T) {
 	// NOTE: this is hazardous it does not update exec hash but doesnt matter here
 	signedOp := state.Op().Child(state.Op().ChildrenSize() - 1).(*cells.BinaryCell)
 	signedOp.SetChildren([]cells.Cell{
-		chainops.NewDelegatePower(0, 2),
+		chainops.NewDelegatePowerOp(0, 2),
 		signedOp.Child(1),
 	})
 
@@ -75,12 +75,12 @@ func BenchmarkDelegateOp(b *B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	delegateOp := chainops.NewDelegatePower(0, 1e6)
-	signedOp, err := chainops.NewSignOperation(delegateOp, privKey)
+	delegateOp := chainops.NewDelegatePowerOp(0, 1e6)
+	signedOp, err := chainops.NewSignedOp(delegateOp, privKey)
 	if err != nil {
 		b.Fatal(err)
 	}
-	state, _ = NextState(state, chainops.NewRoot(signedOp))
+	state, _ = NextState(state, chainops.NewRootOp(signedOp))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		_, err := Unwind(state)
@@ -99,8 +99,8 @@ func newSignedOp(w *wallet.Wallet) (_ *cells.BinaryCell, err error) {
 	if err != nil {
 		return
 	}
-	delegateOp := chainops.NewDelegatePower(0, 1)
-	return chainops.NewSignOperation(delegateOp, privKey)
+	delegateOp := chainops.NewDelegatePowerOp(0, 1)
+	return chainops.NewSignedOp(delegateOp, privKey)
 }
 
 func initState(w *wallet.Wallet) State {

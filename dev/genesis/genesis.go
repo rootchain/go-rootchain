@@ -50,18 +50,18 @@ func Init(config *Config) (block *chain.Block, err error) {
 			return nil, err
 		}
 		if dest.DelegateQuantity > 0 {
-			delegateOp := chainops.NewDelegatePower(0, dest.DelegateQuantity)
-			signedOp, err := chainops.NewSignOperation(delegateOp, privKey)
+			delegateOp := chainops.NewDelegatePowerOp(0, dest.DelegateQuantity)
+			signedOp, err := chainops.NewSignedOp(delegateOp, privKey)
 			if err != nil {
 				return nil, err
 			}
 			privKeys = append(privKeys, privKey)
 			delegateOps = append(delegateOps, signedOp)
 		}
-		assignOps = append(assignOps, chainops.NewAssignPower(0, dest.AssignQuantity, addr))
+		assignOps = append(assignOps, chainops.NewAssignPowerOp(0, dest.AssignQuantity, addr))
 	}
 	// chain exec root op
-	root := chainops.NewRoot()
+	root := chainops.NewRootOp()
 	root.AddChildren(assignOps...)
 	root.AddChildren(delegateOps...)
 	// initialize block

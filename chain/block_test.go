@@ -32,12 +32,12 @@ var (
 func TestBinaryCell(t *T) {
 	c, _ := cells.DecodeCID("zFNScYMH8j9JuHxLR5KLsNP528LuLBi7ToCrh9tmdLb85pWno5Bg")
 	allocOp := cells.Op(chainops.OpAssignPower,
-		chainops.NewCID(c),
+		chainops.NewCIDOp(c),
 		synaptic.Uint64(1e6))
 
 	var head string
-	block, err := NewBlock(0, nil, chainops.NewRoot(allocOp))
-	assert.Equal(t, nil, err)
+	block, err := NewBlock(0, nil, chainops.NewRootOp(allocOp))
+	assert.Empty(t, err)
 	assert.Equal(t, uint64(0), block.Height())
 	// assert.Equal(t, "zFSec2XVAw1qbBFm7rFFV81U8UwGqBLuV7SGze8vPyQbziy7zbku", block.Head().String())
 	assert.Equal(t, "zFuncm69C7pUHeGn1cTt5i8YHKsRxyuLrU4PJwMFXF75jvseJdAK", block.header.Exec.String())
@@ -46,16 +46,16 @@ func TestBinaryCell(t *T) {
 	body, err := block.Root().Marshal()
 	assert.Equal(t, genesisEnc, base32check.EncodeToString(body))
 
-	block, err = block.Next(chainops.NewRoot(allocOp))
-	assert.Equal(t, nil, err)
+	block, err = block.Next(chainops.NewRootOp(allocOp))
+	assert.Empty(t, err)
 	assert.Equal(t, uint64(1), block.Height())
 	assert.Equal(t, head, block.Prev().String())
 	// assert.Equal(t, "zFSec2XVBdAsns1xHLkvMhcJnvtK4tchNG8DBhiXcZd4kUqQbGVa", block.Head().String())
 	// assert.Equal(t, "zFSec2XVGN5saHLfhnwm3s5TRXTPNGGcbggyfXSYLP97nxn6HStJ", block.Header.Exec.String())
 	head = block.Head().String()
 
-	block, err = block.Next(chainops.NewRoot(allocOp))
-	assert.Equal(t, nil, err)
+	block, err = block.Next(chainops.NewRootOp(allocOp))
+	assert.Empty(t, err)
 	assert.Equal(t, uint64(2), block.Height())
 	assert.Equal(t, head, block.Prev().String())
 	// assert.Equal(t, "zFSec2XV3e6uoSd8sTcBM717xMweVCBQFBoMQc4Qy3JGtYMtu34E", block.Head().String())

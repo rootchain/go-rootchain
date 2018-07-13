@@ -84,14 +84,14 @@ func (hdr *BlockHeader) EnsureHead() error {
 	if hdr.Exec == nil {
 		return errors.New("cannot compute head w/o exec hash")
 	}
-	if hdr.Exec == nil {
+	if hdr.State == nil {
 		return errors.New("cannot compute head w/o state hash")
 	}
 	if hdr.Time.IsZero() {
 		return errors.New("cannot compute head w/o timestamp")
 	}
 	if hdr.Head == nil {
-		hdr.Head = chainops.NewHeader(hdr.Height, hdr.Prev, hdr.Exec, hdr.State, hdr.Time).CID()
+		hdr.Head = chainops.NewHeaderOp(hdr.Height, hdr.Prev, hdr.Exec, hdr.State, hdr.Time).CID()
 	}
 	return nil
 }

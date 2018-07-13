@@ -24,43 +24,43 @@ import (
 	"github.com/rootchain/go-rootchain/dev/synaptic"
 )
 
-// NewRoot - Creates root operation.
-func NewRoot(ops ...cells.Cell) *cells.BinaryCell {
+// NewRootOp - Creates root operation.
+func NewRootOp(ops ...cells.Cell) *cells.BinaryCell {
 	return cells.Op(OpRoot, ops...)
 }
 
-// NewCID - Creates CID binary cell.
-func NewCID(c *cells.CID) *cells.BinaryCell {
+// NewCIDOp - Creates CID binary cell.
+func NewCIDOp(c *cells.CID) *cells.BinaryCell {
 	if c == nil {
 		return cells.Op(OpCID)
 	}
 	return cells.New(OpCID, c.Bytes())
 }
 
-// NewSignOperation - Signs binary cell and creates signed operation.
-func NewSignOperation(op *cells.BinaryCell, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
+// NewSignedOp - Signs binary cell and creates signed operation.
+func NewSignedOp(op *cells.BinaryCell, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
 	hash := op.CID().Digest()
 	if size := len(hash); size != 32 {
 		return nil, fmt.Errorf("invalid hash length %d", size)
 	}
-	sig, err := SignBytes(hash, pk)
+	sig, err := NewSignatureOp(hash, pk)
 	if err != nil {
 		return
 	}
 	return cells.Op(OpSigned, op, sig), nil
 }
 
-// SignBytes - Signs bytes and creates signature operation.
-func SignBytes(body []byte, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
+// NewSignatureOp - Signs bytes and creates signature operation.
+func NewSignatureOp(body []byte, pk *btcec.PrivateKey) (_ *cells.BinaryCell, err error) {
 	sig, err := btcec.SignCompact(btcec.S256(), pk, body, false)
 	if err != nil {
 		return
 	}
-	return NewSignature(sig), nil
+	return NewSignatureOpFromBytes(sig), nil
 }
 
-// NewSignature - Creates signature binary cell.
-func NewSignature(sig []byte) *cells.BinaryCell {
+// NewSignatureOpFromBytes - Creates signature binary cell.
+func NewSignatureOpFromBytes(sig []byte) *cells.BinaryCell {
 	return cells.New(OpSignature, sig)
 }
 
@@ -70,41 +70,41 @@ func NewSigned(op cells.Cell, signatures ...cells.Cell) *cells.BinaryCell {
 	return cells.Op(OpSigned, ops...)
 }
 
-// NewPubkey - Creates public key cell.
-func NewPubkey(pubkey *btcec.PublicKey) *cells.BinaryCell {
-	return NewPubkeyFromBytes(pubkey.SerializeCompressed())
+// NewPubkeyOp - Creates public key cell.
+func NewPubkeyOp(pubkey *btcec.PublicKey) *cells.BinaryCell {
+	return NewPubkeyOpFromBytes(pubkey.SerializeCompressed())
 }
 
-// NewPubkeyFromBytes - Creates public key cell.
-func NewPubkeyFromBytes(pubkey []byte) *cells.BinaryCell {
+// NewPubkeyOpFromBytes - Creates public key cell.
+func NewPubkeyOpFromBytes(pubkey []byte) *cells.BinaryCell {
 	return cells.New(OpPubkey, pubkey)
 }
 
-// NewAssignPower - Creates assign power operation.
-func NewAssignPower(nonce cells.ID, quantity uint64, addr *cells.CID) *cells.BinaryCell {
-	c := cells.Op(OpAssignPower, synaptic.Uint64(quantity), NewCID(addr))
+// NewAssignPowerOp - Creates assign power operation.
+func NewAssignPowerOp(nonce cells.ID, quantity uint64, addr *cells.CID) *cells.BinaryCell {
+	c := cells.Op(OpAssignPower, synaptic.Uint64(quantity), NewCIDOp(addr))
 	if nonce > 0 {
-		c.AddChildren(NewNonce(nonce))
+		c.AddChildren(NewNonceOp(nonce))
 	}
 	return c
 }
 
-// NewDelegatePower - Creates delegate power operation.
-func NewDelegatePower(nonce cells.ID, quantity uint64, addrs ...*cells.CID) *cells.BinaryCell {
+// NewDelegatePowerOp - Creates delegate power operation.
+func NewDelegatePowerOp(nonce cells.ID, quantity uint64, addrs ...*cells.CID) *cells.BinaryCell {
 	c := cells.Op(OpDelegatePower, synaptic.Uint64(quantity))
 	if len(addrs) > 0 {
 		for _, addr := range addrs {
-			c.AddChildren(NewCID(addr))
+			c.AddChildren(NewCIDOp(addr))
 		}
 	}
 	if nonce > 0 {
-		c.AddChildren(NewNonce(nonce))
+		c.AddChildren(NewNonceOp(nonce))
 	}
 	return c
 }
 
-// NewPubkeyToAddr - Creates public key hash cell from public key.
-func NewPubkeyToAddr(bytes []byte) *cells.BinaryCell {
+// NewAddrOpFromPubkey - Creates public key hash cell from public key.
+func NewAddrOpFromPubkey(bytes []byte) *cells.BinaryCell {
 	c, err := cells.SumCID(keypair.CIDPrefix, bytes)
 	if err != nil {
 		panic(err)
@@ -112,19 +112,19 @@ func NewPubkeyToAddr(bytes []byte) *cells.BinaryCell {
 	return cells.New(OpPubkeyAddr, c.Bytes())
 }
 
-// NewNonce - Creates new uint64 cell.
-func NewNonce(nonce cells.ID) *cells.BinaryCell {
+// NewNonceOp - Creates new uint64 cell.
+func NewNonceOp(nonce cells.ID) *cells.BinaryCell {
 	return cells.New(OpNonce, nonce.Bytes())
 }
 
-// NewHeader - Creates new header cell.
+// NewHeaderOp - Creates new header cell.
 // Following format is used: `[height][prev-hash][exec-hash][state-hash][timestamp]`.
-func NewHeader(height uint64, prev, exec, state *cells.CID, t time.Time) *cells.BinaryCell {
+func NewHeaderOp(height uint64, prev, exec, state *cells.CID, t time.Time) *cells.BinaryCell {
 	return cells.Op(OpHeader,
 		synaptic.Uint64(height),
-		NewCID(prev),
-		NewCID(exec),
-		NewCID(state),
+		NewCIDOp(prev),
+		NewCIDOp(exec),
+		NewCIDOp(state),
 		synaptic.Uint64(uint64(t.Unix())),
 	)
 }

@@ -40,7 +40,7 @@ type Cell interface {
 
 // NewRoot - Creates new root exec cell.
 func NewRoot(ctx context.Context, cell cells.Cell) Cell {
-	return &execCell{Cell: cell, ctx: ctx, parent: chainops.NewRoot(cell)}
+	return &execCell{Cell: cell, ctx: ctx, parent: chainops.NewRootOp(cell)}
 }
 
 // NewCell - Creates new exec cell.
