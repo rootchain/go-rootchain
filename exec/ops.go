@@ -43,7 +43,10 @@ func assignOp(state State) (State, error) {
 		return nil, err
 	}
 	logger.Debugw("Assign Operation", "op", state.Op())
-	state.Store().Set(assignee, quantity)
+	err = state.Store().Update(assignee, quantity)
+	if err != nil {
+		return nil, err
+	}
 	return state, nil
 }
 
@@ -66,7 +69,10 @@ func delegateOp(state State) (State, error) {
 		return nil, errors.New("DelegateOp: second argument is not nonce")
 	}
 	addr := keypair.CID(pk)
-	balance := state.Store().Get(addr)
+	balance, err := state.Store().Get(addr)
+	if err != nil {
+		return nil, err
+	}
 	logger.Debugw("Delegate Power Operation",
 		"source", addr.String(),
 		"quantity", quantity,
