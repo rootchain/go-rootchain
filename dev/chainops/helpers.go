@@ -64,12 +64,6 @@ func NewSignatureOpFromBytes(sig []byte) *cells.BinaryCell {
 	return cells.New(OpSignature, sig)
 }
 
-// NewSigned - Creates signed binary cell.
-func NewSigned(op cells.Cell, signatures ...cells.Cell) *cells.BinaryCell {
-	ops := append(cells.Ops(op), signatures...)
-	return cells.Op(OpSigned, ops...)
-}
-
 // NewPubkeyOp - Creates public key cell.
 func NewPubkeyOp(pubkey *btcec.PublicKey) *cells.BinaryCell {
 	return NewPubkeyOpFromBytes(pubkey.SerializeCompressed())
