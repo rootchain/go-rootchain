@@ -15,7 +15,11 @@
 package genesis
 
 import (
+	"github.com/ethereum/go-ethereum/trie"
+	cells "github.com/ipfn/go-ipfn-cells"
 	wallet "github.com/ipfn/go-ipfn-wallet"
+	"github.com/rootchain/go-rootchain/chain"
+	"github.com/rootchain/go-rootchain/exec"
 )
 
 // Config - Genesis config.
@@ -26,6 +30,9 @@ type Config struct {
 
 	// Power - Initial power distribution.
 	Power []*Distribution
+
+	// Database - State database to use.
+	Database *trie.Database
 }
 
 // Assign - Assign power distribution.
@@ -42,6 +49,18 @@ func (config *Config) WalletKeys() (keys []string) {
 		keys = appendIfMissing(keys, alloc.WalletKeyPath.SeedName)
 	}
 	return keys
+}
+
+func (config *Config) unwind(block *chain.Block) (_ *cells.CID, err error) {
+	store, err := exec.NewStore(nil, config.Database)
+	if err != nil {
+		return
+	}
+	_, err = exec.Unwind(exec.NewState(store, block))
+	if err != nil {
+		return
+	}
+	return store.Commit()
 }
 
 func appendIfMissing(slice []string, i string) []string {

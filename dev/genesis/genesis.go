@@ -69,6 +69,13 @@ func Init(config *Config) (block *chain.Block, err error) {
 	if err != nil {
 		return nil, err
 	}
+	// unwind block operations
+	state, err := config.unwind(block)
+	if err != nil {
+		return
+	}
+	// set block state hash
+	block.SetStateHash(state)
 	// sign block with private keys
 	for _, key := range privKeys {
 		if _, err := block.Sign(key); err != nil {
