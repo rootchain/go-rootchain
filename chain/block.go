@@ -35,15 +35,15 @@ type Block struct {
 }
 
 // NewBlock - Creates new block structure.
-func NewBlock(index uint64, prevHash *cells.CID, opsRoot cells.MutableCell) (block *Block, err error) {
+func NewBlock(index uint64, prevCID *cells.CID, opsRoot cells.MutableCell) (block *Block, err error) {
 	if opsRoot.OpCode() != chainops.OpRoot {
 		return nil, fmt.Errorf("invalid root opcode %s", opsRoot.OpCode())
 	}
-	if prevHash == nil && index > 0 {
+	if prevCID == nil && index > 0 {
 		return nil, fmt.Errorf("prev hash cannot be empty with index %d", index)
 	}
 	execCID := opsRoot.CID()
-	header, err := NewBlockHeader(index, prevHash, execCID)
+	header, err := NewBlockHeader(index, prevCID, execCID)
 	if err != nil {
 		return
 	}
@@ -51,10 +51,6 @@ func NewBlock(index uint64, prevHash *cells.CID, opsRoot cells.MutableCell) (blo
 		header:  header,
 		opsRoot: opsRoot,
 		sigRoot: cells.Op(chainops.OpSigned, opsRoot),
-	}
-	err = block.calcHeader()
-	if err != nil {
-		return
 	}
 	return
 }
@@ -72,6 +68,11 @@ func (block *Block) Height() uint64 {
 // Head - Returns head CID.
 func (block *Block) Head() *cells.CID {
 	return block.header.Head
+}
+
+// State - Returns state CID.
+func (block *Block) State() *cells.CID {
+	return block.header.State
 }
 
 // Signed - Returns signed head CID.
@@ -105,23 +106,27 @@ func (block *Block) IsGenesis() bool {
 	return block.Height() == 0
 }
 
-// SetStateHash - Sets state hash. Resets head hash.
+// SetStateHash - Sets state hash. Resets head hash and signatures.
 func (block *Block) SetStateHash(c *cells.CID) {
 	block.header.SetStateHash(c)
+	block.signatures = nil
 }
 
 // Next - Returns next state including given ops.
-func (block *Block) Next(root cells.MutableCell) (*Block, error) {
-	if root.ChildrenSize() == 0 {
+func (block *Block) Next(opsRoot cells.MutableCell) (*Block, error) {
+	if opsRoot.ChildrenSize() == 0 {
 		return nil, errors.New("cannot produce state with zero operations")
 	}
-	return NewBlock(block.Height()+1, block.Head(), root)
+	return NewBlock(block.Height()+1, block.Head(), opsRoot)
 }
 
 // Sign - Signs state with given private key.
 // Computes new signed header hash.
 func (block *Block) Sign(key *btcec.PrivateKey) (_ cells.Cell, err error) {
-	block.header.EnsureHead()
+	err = block.calcHeader(false)
+	if err != nil {
+		return
+	}
 	sigOp, err := chainops.NewSignatureOp(block.Head().Bytes(), key)
 	if err != nil {
 		return
@@ -140,7 +145,7 @@ type stateJSON struct {
 
 // MarshalJSON - Marshals state to JSON.
 func (block *Block) MarshalJSON() ([]byte, error) {
-	if err := block.calcHeader(); err != nil {
+	if err := block.calcHeader(true); err != nil {
 		return nil, err
 	}
 	return json.Marshal(stateJSON{
@@ -158,16 +163,19 @@ func (block *Block) reset() {
 	block.signatures = nil
 }
 
-func (block *Block) calcHeader() (err error) {
+func (block *Block) calcHeader(sigs bool) (err error) {
 	if block.header.Exec == nil {
 		block.header.SetExecHash(block.opsRoot.CID())
+	}
+	if block.header.State == nil {
+		return
 	}
 	if block.header.Head == nil {
 		if err := block.header.EnsureHead(); err != nil {
 			return err
 		}
 	}
-	if block.header.Signed == nil && len(block.signatures) > 0 {
+	if sigs && block.header.Signed == nil && len(block.signatures) > 0 {
 		body, err := block.sigRoot.Marshal()
 		if err != nil {
 			return err

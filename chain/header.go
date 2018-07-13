@@ -49,14 +49,14 @@ type BlockHeader struct {
 }
 
 // NewBlockHeader - Creates new state header structure.
-func NewBlockHeader(index uint64, prevHash *cells.CID, execCID *cells.CID) (hdr *BlockHeader, err error) {
-	if prevHash == nil && index > 0 {
+func NewBlockHeader(index uint64, prevCID *cells.CID, execCID *cells.CID) (hdr *BlockHeader, err error) {
+	if prevCID == nil && index > 0 {
 		return nil, fmt.Errorf("prev hash cannot be empty with index %d", index)
 	}
 	return &BlockHeader{
 		Height: index,
 		Time:   time.Now(),
-		Prev:   prevHash,
+		Prev:   prevCID,
 		Exec:   execCID,
 	}, nil
 }
