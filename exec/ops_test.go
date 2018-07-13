@@ -15,6 +15,7 @@
 package exec
 
 import (
+	"os"
 	. "testing"
 
 	cells "github.com/ipfn/go-ipfn-cells"
@@ -27,6 +28,7 @@ import (
 
 func init() {
 	logger.Disable()
+	wallet.SetDefaultWalletPath(os.TempDir())
 }
 
 func TestAssignOp(t *T) {
@@ -105,6 +107,14 @@ func newSignedOp(w *wallet.Wallet) (_ *cells.BinaryCell, err error) {
 
 func initState(w *wallet.Wallet) State {
 	defer logger.Sync()
+	if ok, err := w.KeyExists("default"); !ok {
+		_, err := w.CreateSeed("default", []byte("123"))
+		if err != nil {
+			panic(err)
+		}
+	} else if err != nil {
+		panic(err)
+	}
 	_, err := w.Unlock("default", []byte("123"))
 	if err != nil {
 		panic(err)
