@@ -17,13 +17,14 @@ package chainops
 import (
 	base32check "github.com/ipfn/go-base32check"
 	cells "github.com/ipfn/go-ipfn-cells"
-	multihash "github.com/multiformats/go-multihash"
 	"github.com/rootchain/go-rootchain/dev/synaptic"
+
+	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
 )
 
 // NewMultihash - Creates multihash binary cell.
-func NewMultihash(mh multihash.Multihash) *cells.BinaryCell {
-	return cells.New(OpMultihash, []byte(mh))
+func NewMultihash(mhash mh.Multihash) *cells.BinaryCell {
+	return cells.New(OpMultihash, []byte(mhash))
 }
 
 // NewID New- Creates new uint64 cell.
