@@ -17,9 +17,12 @@ package chain
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/trie"
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 	wallet "github.com/ipfn/go-ipfn-wallet"
+	ipfsdb "github.com/rootchain/go-ipfs-db"
 	"github.com/rootchain/go-rootchain/dev/genesis"
 )
 
@@ -45,7 +48,11 @@ See wallet usage for more information on key derivation path.`,
 
 // HandleInitCmd - Handles chain init command.
 func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
-	config := &genesis.Config{Wallet: wallet.NewDefault()}
+	store := ipfsdb.Wrap(ethdb.NewMemDatabase())
+	config := &genesis.Config{
+		Wallet:   wallet.NewDefault(),
+		Database: trie.NewDatabase(store),
+	}
 
 	// create chain for default wallet by default
 	if len(assignPaths) == 0 {
