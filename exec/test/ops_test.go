@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package exec
+package exectest
 
 import (
 	"os"
@@ -23,6 +23,7 @@ import (
 	wallet "github.com/ipfn/go-ipfn-wallet"
 	"github.com/rootchain/go-rootchain/dev/chainops"
 	"github.com/rootchain/go-rootchain/dev/genesis"
+	"github.com/rootchain/go-rootchain/exec"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,16 +39,19 @@ func TestAssignOp(t *T) {
 	{
 		key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/first"))
 		c, _ := key.CID()
-		assert.Equal(t, uint64(1e6), state.Store().Get(c))
+		val, _ := state.Store().Get(c)
+		assert.Equal(t, uint64(1e6), val)
 	}
 	{
 		key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/assign-op-test"))
 		c, _ := key.CID()
-		assert.Equal(t, uint64(0), state.Store().Get(c))
-		state, _ = NextState(state, chainops.NewRootOp(
+		val, _ := state.Store().Get(c)
+		assert.Equal(t, uint64(0), val)
+		state, err := exec.NextState(state, chainops.NewRootOp(
 			chainops.NewAssignPowerOp(0, 1000, c),
 		))
-		_, err := Unwind(state)
+		assert.Empty(t, err)
+		_, err = exec.Unwind(state)
 		assert.Equal(t, "AssignOp: cannot assign on non-zero height", err.Error())
 	}
 }
@@ -64,7 +68,7 @@ func TestDelegateOp(t *T) {
 		signedOp.Child(1),
 	})
 
-	state, err := Unwind(state)
+	state, err := exec.Unwind(state)
 	assert.Equal(t, "DelegateOp: balance 0 is not enough to delegate 2", err.Error())
 }
 
@@ -82,10 +86,10 @@ func BenchmarkDelegateOp(b *B) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	state, _ = NextState(state, chainops.NewRootOp(signedOp))
+	state, _ = exec.NextState(state, chainops.NewRootOp(signedOp))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := Unwind(state)
+		_, err := exec.Unwind(state)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -105,7 +109,7 @@ func newSignedOp(w *wallet.Wallet) (_ *cells.BinaryCell, err error) {
 	return chainops.NewSignedOp(delegateOp, privKey)
 }
 
-func initState(w *wallet.Wallet) State {
+func initState(w *wallet.Wallet) exec.State {
 	defer logger.Sync()
 	if ok, err := w.KeyExists("default"); !ok {
 		_, err := w.CreateSeed("default", []byte("123"))
@@ -119,7 +123,10 @@ func initState(w *wallet.Wallet) State {
 	if err != nil {
 		panic(err)
 	}
-	config := &genesis.Config{Wallet: w}
+	config := &genesis.Config{
+		Wallet:   w,
+		Database: localTrieDB,
+	}
 	config.Assign(genesis.MustParsePowerString("default/x/first:1e6:1e6"))
 	config.Assign(genesis.MustParsePowerString("default/x/second:1e6:1e6"))
 	config.Assign(genesis.MustParsePowerString("default/x/third:1e6:0"))
@@ -127,10 +134,6 @@ func initState(w *wallet.Wallet) State {
 	if err != nil {
 		panic(err)
 	}
-	state := NewState(NewStore(), head)
-	result, err := Unwind(state)
-	if err != nil {
-		panic(err)
-	}
-	return result
+	store := initStore(head.State())
+	return exec.NewState(store, head)
 }
