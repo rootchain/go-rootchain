@@ -29,7 +29,7 @@ import (
 
 func init() {
 	logger.Disable()
-	wallet.SetDefaultWalletPath(os.TempDir())
+	wallet.SetDefaultPath(os.TempDir())
 }
 
 func TestAssignOp(t *T) {
