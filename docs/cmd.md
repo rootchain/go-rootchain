@@ -14,12 +14,12 @@ Usage:
   rcx chain init [config] [flags]
 
 Examples:
-  $ rcx chain init -n mychain -a wallet:1e6:1e6 -a default/x/test:1e6:0
+  $ rcx chain init -a wallet:1e6:1e6 -a default/x/test:1e6:0
   $ rcx chain init -a zFNScYMGz4wQocWbvHVqS1HcbzNzJB5JK3eAkzF9krbSLZiV8cNr:1
 
 Flags:
-  -h, --help           help for init
-  -a, --addr strings   address and power in addr:power format
+  -a, --assign strings   key path or address and power in key:power:delegated format
+  -h, --help             help for init
 ```
 
 ## `wallet create`
