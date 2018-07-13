@@ -15,63 +15,125 @@
 package exec
 
 import (
+	"errors"
+
+	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
+	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/trie"
+	"github.com/gogo/protobuf/proto"
 	cells "github.com/ipfn/go-ipfn-cells"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 )
 
 // Store - Execution store.
 type Store interface {
+	// Get - Gets value under key.
+	Get(key *cells.CID) (uint64, error)
+
+	// Update - Updates value under key.
+	Update(key *cells.CID, value uint64) error
+
 	// Total - Total power.
 	Total() uint64
-	// Get - Gets value under key.
-	Get(key *cells.CID) uint64
-	// Set - Sets value under key.
-	Set(key *cells.CID, value uint64)
-	// Clone - Clones store.
-	Clone() Store
+
+	// Commit - Saves store state to database.
+	Commit() (*cells.CID, error)
+
+	// Clone - Clones store with current state.
+	Clone() (Store, error)
 }
 
 // NewStore - Creates new mutable execution store.
-func NewStore() Store {
-	return &execStore{maps: make(map[string]uint64)}
+func NewStore(state *cells.CID, triedb *trie.Database) (_ Store, err error) {
+	var hash common.Hash
+	if state != nil {
+		hash = common.BytesToHash(state.Digest())
+	}
+	t, err := trie.New(hash, triedb)
+	if err != nil {
+		return
+	}
+	tb, err := t.TryGet(totalKey)
+	if err != nil {
+		return
+	}
+	total, _ := proto.DecodeVarint(tb)
+	return &execStore{
+		trie:   t,
+		triedb: triedb,
+		commit: state,
+		total:  total,
+	}, nil
 }
+
+var totalKey = []byte("rootchain.total_power")
 
 type execStore struct {
-	root  *execStore
-	maps  map[string]uint64
+	trie   *trie.Trie
+	triedb *trie.Database
+
 	total uint64
+
+	commit *cells.CID
 }
 
-func (s *execStore) Get(key *cells.CID) uint64 {
-	return s.get(key.String())
+func (s *execStore) Get(key *cells.CID) (val uint64, err error) {
+	body, err := s.trie.TryGet(key.Bytes())
+	if err != nil {
+		return
+	}
+	val, _ = proto.DecodeVarint(body)
+	return
 }
 
-func (s *execStore) Set(key *cells.CID, value uint64) {
-	s.set(key.String(), value)
+func (s *execStore) Update(key *cells.CID, value uint64) (err error) {
+	prev, err := s.Get(key)
+	if err != nil {
+		return
+	}
+	err = s.trie.TryUpdate(key.Bytes(), proto.EncodeVarint(value))
+	if err != nil {
+		return
+	}
+	s.commit = nil
+	s.total += value - prev
+	logger.Debugw("Store Update", "key", key, "value", value, "total", s.total, "prev", prev)
+	return nil
 }
 
 func (s *execStore) Total() uint64 {
 	return s.total
 }
 
-func (s *execStore) Clone() Store {
-	return &execStore{root: s, total: s.total, maps: make(map[string]uint64)}
+func (s *execStore) Commit() (_ *cells.CID, err error) {
+	err = s.trie.TryUpdate(totalKey, proto.EncodeVarint(s.total))
+	if err != nil {
+		return
+	}
+	commit, err := s.trie.Commit(nil)
+	if err != nil {
+		return
+	}
+	err = s.triedb.Commit(commit, false)
+	if err != nil {
+		return
+	}
+	s.commit = cells.NewCIDFromHash(cid.EthStateTrie, commit[:], mh.KECCAK_256)
+	return s.commit, nil
 }
 
-func (s *execStore) set(cid string, value uint64) {
-	prev := s.get(cid)
-	s.total += value - prev
-	s.maps[cid] = value
-	logger.Infow("Store Set", "key", cid, "value", value, "total", s.total, "prev", prev)
-}
-
-func (s *execStore) get(key string) uint64 {
-	// todo: make sure zero-ing doesnt mess-up `ok` value
-	if value, ok := s.maps[key]; ok {
-		return value
+func (s *execStore) Clone() (Store, error) {
+	if s.commit == nil {
+		return nil, errors.New("store not committed")
 	}
-	if s.root == nil {
-		return 0
+	t, err := trie.New(common.BytesToHash(s.commit.Digest()), s.triedb)
+	if err != nil {
+		return nil, err
 	}
-	return s.root.get(key)
+	return &execStore{
+		trie:   t,
+		triedb: s.triedb,
+	}, nil
 }
