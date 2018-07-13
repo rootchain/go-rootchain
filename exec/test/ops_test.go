@@ -36,8 +36,9 @@ func TestAssignOp(t *T) {
 	w := wallet.NewDefault()
 	state := initState(w)
 	assert.Equal(t, uint64(3e6), state.Store().Total())
-	{
-		key, _ := w.UnlockedDerive(wallet.MustParseKeyPath("default/x/first"))
+	keys := []string{"default/x/first", "default/x/second", "default/x/third"}
+	for _, keyPath := range keys {
+		key, _ := w.UnlockedDerive(wallet.MustParseKeyPath(keyPath))
 		c, _ := key.CID()
 		val, _ := state.Store().Get(c)
 		assert.Equal(t, uint64(1e6), val)
