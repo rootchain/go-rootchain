@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/spf13/cobra"
 
 	cmdutil "github.com/ipfn/go-ipfn-cmd-util"
@@ -71,12 +72,14 @@ func HandleDeriveCmd(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return
 	}
+	btc, _ := acc.Address(&chaincfg.SimNetParams)
+	neuter, _ := acc.Neuter()
+	c, _ := acc.CID()
+	logger.Print()
+	logger.Printf("Address:     %s", btc)
+	logger.Printf("Address:     %s", c)
+	logger.Printf("Public key:  %s", neuter)
 	if printInfo {
-		neuter, _ := acc.Neuter()
-		c, _ := acc.CID()
-		logger.Print()
-		logger.Printf("Address:     %s", c)
-		logger.Printf("Public key:  %s", neuter)
 		logger.Printf("Private key: %s", acc.PrivateString())
 	}
 	return
