@@ -19,12 +19,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rootchain/go-rootchain/dev/chainops"
-
 	"github.com/ipfn/go-ipfn-cells"
+	"github.com/rootchain/go-rootchain/dev/chainops"
 )
 
-// BlockHeader - Block header structure.
+// BlockHeader - Block header.
 type BlockHeader struct {
 	// Height - Block height.
 	Height uint64 `json:"height,omitempty"`
@@ -91,7 +90,14 @@ func (hdr *BlockHeader) EnsureHead() error {
 		return errors.New("cannot compute head w/o timestamp")
 	}
 	if hdr.Head == nil {
-		hdr.Head = chainops.NewHeaderOp(hdr.Height, hdr.Prev, hdr.Exec, hdr.State, hdr.Time).CID()
+		body, err := chainops.NewHeaderOp(hdr.Height, hdr.Prev, hdr.Exec, hdr.State, hdr.Time).Marshal()
+		if err != nil {
+			return err
+		}
+		hdr.Head, err = cells.SumCID(HeaderPrefix, body)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

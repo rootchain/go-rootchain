@@ -20,10 +20,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/ipfn/go-ipfn-cells"
 	"github.com/rootchain/go-rootchain/dev/chainops"
-
-	"github.com/btcsuite/btcd/btcec"
 )
 
 // Block - Chain block structure.
