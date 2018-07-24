@@ -18,7 +18,7 @@ import (
 	"context"
 
 	cells "github.com/ipfn/go-ipfn-cells"
-	"github.com/rootchain/go-rootchain/chain"
+	"github.com/rootchain/go-rootchain/core/chain"
 )
 
 // State - Execution stack context.

@@ -36,14 +36,32 @@ func TestParsePowerString(t *T) {
 
 func TestParsePowerString_Address(t *T) {
 	addr, _ := cells.DecodeCID("zFNScYMHAiBJPJcT9ri2cNwKTJfitbRcE2PSfMKQj272C6A5Fs25")
-	expected := &Distribution{
-		AssignQuantity: 1e6,
-		Address:        addr,
-	}
 	parsed, err := ParsePowerString("zFNScYMHAiBJPJcT9ri2cNwKTJfitbRcE2PSfMKQj272C6A5Fs25:1e6")
 	assert.Empty(t, err)
-	assert.Empty(t, parsed.WalletKeyPath)
-	assert.Equal(t, expected.AssignQuantity, parsed.AssignQuantity)
-	assert.Equal(t, expected.DelegateQuantity, parsed.DelegateQuantity)
-	assert.Equal(t, expected.Address.String(), parsed.Address.String())
+	assert.Equal(t, parsed, &Distribution{
+		AssignQuantity: 1e6,
+		Address:        addr,
+	})
+	parsed, err = ParsePowerString("zFNScYMHA:1e6")
+	assert.Empty(t, err)
+	assert.Equal(t, parsed, &Distribution{
+		AssignQuantity: 1e6,
+		WalletKeyPath:  wallet.MustParseKeyPath("zFNScYMHA"),
+	})
+}
+
+func TestParsePowerString_Chain(t *T) {
+	addr, _ := cells.DecodeCID("zFSec2XV8EGiAKaBS8xL8meisn9KyKVwY7UprRH2x51SBgPXKGZM")
+	parsed, err := ParsePowerString("zFSec2XV8EGiAKaBS8xL8meisn9KyKVwY7UprRH2x51SBgPXKGZM:1e6")
+	assert.Empty(t, err)
+	assert.Equal(t, parsed, &Distribution{
+		AssignQuantity: 1e6,
+		Address:        addr,
+	})
+	parsed, err = ParsePowerString("zFSec2XV8EG:1e6")
+	assert.Empty(t, err)
+	assert.Equal(t, parsed, &Distribution{
+		AssignQuantity: 1e6,
+		WalletKeyPath:  wallet.MustParseKeyPath("zFSec2XV8EG"),
+	})
 }

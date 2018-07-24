@@ -19,8 +19,8 @@ import (
 	"github.com/ethereum/go-ethereum/trie"
 	cells "github.com/ipfn/go-ipfn-cells"
 	wallet "github.com/ipfn/go-ipfn-wallet"
-	"github.com/rootchain/go-rootchain/chain"
-	"github.com/rootchain/go-rootchain/exec"
+	"github.com/rootchain/go-rootchain/core/chain"
+	"github.com/rootchain/go-rootchain/core/exec"
 )
 
 // Config - Genesis config.

@@ -22,19 +22,26 @@ const (
 	// PubkeyHash - Content ID of Sealed Cell Version 1. (24748)
 	PubkeyHash = 0x60ac
 	// BinaryCell - Content ID of Binary Cell Version 1. (28860)
+	// Reserved for NEXT Version is (0xb0bc, 45244).
 	BinaryCell = 0x70bc
 	// ChainHeader - Content ID of Chain Header Version 1. (79278)
 	ChainHeader = 0x51df0
 	// ChainSigned - Content ID of Chain Signed Header Version 1. (335344)
 	ChainSigned = 0x135ae
+	// OperationTrie - Content ID of Cell Trie Version 1. (26156)
+	OperationTrie = 0x662c
+	// StateTrie - Content ID of Cell Trie Version 1. (27549)
+	StateTrie = 0x6b9d
 )
 
 // Codecs - Maps the name of a codec to its type.
 var Codecs = map[string]uint64{
-	"pubkey-hash":  PubkeyHash,
-	"cell-binary":  BinaryCell,
-	"chain-header": ChainHeader,
-	"chain-signed": ChainSigned,
+	"pubkey-hash":    PubkeyHash,
+	"cell-binary":    BinaryCell,
+	"chain-header":   ChainHeader,
+	"chain-signed":   ChainSigned,
+	"operation-trie": OperationTrie,
+	"state-trie":     StateTrie,
 }
 
 // CodecToStr - Maps the numeric codec to its name.

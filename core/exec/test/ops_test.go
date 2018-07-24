@@ -21,9 +21,9 @@ import (
 	cells "github.com/ipfn/go-ipfn-cells"
 	"github.com/ipfn/go-ipfn-cmd-util/logger"
 	wallet "github.com/ipfn/go-ipfn-wallet"
+	"github.com/rootchain/go-rootchain/core/exec"
 	"github.com/rootchain/go-rootchain/dev/chainops"
 	"github.com/rootchain/go-rootchain/dev/genesis"
-	"github.com/rootchain/go-rootchain/exec"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -131,10 +131,10 @@ func initState(w *wallet.Wallet) exec.State {
 	config.Assign(genesis.MustParsePowerString("default/x/first:1e6:1e6"))
 	config.Assign(genesis.MustParsePowerString("default/x/second:1e6:1e6"))
 	config.Assign(genesis.MustParsePowerString("default/x/third:1e6:0"))
-	head, err := genesis.Init(config)
+	signed, err := genesis.Init(config)
 	if err != nil {
 		panic(err)
 	}
-	store := initStore(head.State())
-	return exec.NewState(store, head)
+	store := initStore(signed.StateHash())
+	return exec.NewState(store, signed.Block)
 }

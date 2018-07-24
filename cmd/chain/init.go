@@ -15,6 +15,7 @@
 package chain
 
 import (
+	"github.com/rootchain/go-rootchain/dev/contents"
 	"github.com/spf13/cobra"
 
 	"github.com/ethereum/go-ethereum/ethdb"
@@ -48,7 +49,7 @@ See wallet usage for more information on key derivation path.`,
 
 // HandleInitCmd - Handles chain init command.
 func HandleInitCmd(cmd *cobra.Command, args []string) (err error) {
-	store := ipfsdb.Wrap(ethdb.NewMemDatabase())
+	store := ipfsdb.Wrap(contents.StateTriePrefix, ethdb.NewMemDatabase())
 	config := &genesis.Config{
 		Wallet:   wallet.NewDefault(),
 		Database: trie.NewDatabase(store),

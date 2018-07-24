@@ -24,9 +24,12 @@ import (
 	cells "github.com/ipfn/go-ipfn-cells"
 	keypair "github.com/ipfn/go-ipfn-keypair"
 	ipfsdb "github.com/rootchain/go-ipfs-db"
-	"github.com/rootchain/go-rootchain/exec"
+	"github.com/rootchain/go-rootchain/core/exec"
+	"github.com/rootchain/go-rootchain/dev/contents"
 	"github.com/stretchr/testify/assert"
 )
+
+// TODO(crackcomm): remove empty (0 balance)
 
 func TestStore(t *T) {
 	store := initStore(nil)
@@ -93,7 +96,7 @@ func initStore(root *cells.CID) exec.Store {
 
 var (
 	localStore  = ethdb.NewMemDatabase()
-	ipfsStore   = ipfsdb.Wrap(localStore)
+	ipfsStore   = ipfsdb.Wrap(contents.StateTriePrefix, localStore)
 	localTrieDB = trie.NewDatabase(ipfsStore)
 )
 

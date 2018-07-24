@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chain
+package contents
 
 import (
 	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
 	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
-
-	"github.com/rootchain/go-rootchain/dev/contents"
 )
 
 var (
 	// HeaderPrefix - Header CID prefix.
 	HeaderPrefix = cid.Prefix{
 		Version:  1,
-		Codec:    contents.ChainHeader,
+		Codec:    ChainHeader,
 		MhType:   mh.KECCAK_256,
 		MhLength: 32,
 	}
@@ -33,7 +31,15 @@ var (
 	// SignedPrefix - Signed header CID prefix.
 	SignedPrefix = cid.Prefix{
 		Version:  1,
-		Codec:    contents.ChainSigned,
+		Codec:    ChainSigned,
+		MhType:   mh.KECCAK_256,
+		MhLength: 32,
+	}
+
+	// OperationTriePrefix - Operation trie CID prefix.
+	OperationTriePrefix = cid.Prefix{
+		Version:  1,
+		Codec:    OperationTrie,
 		MhType:   mh.KECCAK_256,
 		MhLength: 32,
 	}
@@ -41,7 +47,7 @@ var (
 	// StateTriePrefix - State trie CID prefix.
 	StateTriePrefix = cid.Prefix{
 		Version:  1,
-		Codec:    cid.EthStateTrie,
+		Codec:    StateTrie,
 		MhType:   mh.KECCAK_256,
 		MhLength: 32,
 	}

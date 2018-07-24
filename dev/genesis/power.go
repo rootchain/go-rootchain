@@ -16,6 +16,7 @@ package genesis
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -39,6 +40,9 @@ type Distribution struct {
 	DelegateQuantity uint64
 }
 
+// validAddr - Regexp expression to test if address is valid.
+var validAddr = regexp.MustCompile(`^zF(NSc|Sec)([a-zA-Z0-9]+){47}$`)
+
 // ParsePowerString - Parses power distribution string.
 //
 // Following formats are allowed:
@@ -52,7 +56,7 @@ func ParsePowerString(keyPath string) (res *Distribution, err error) {
 		return nil, fmt.Errorf("invalid key:power:delegated format: %q", keyPath)
 	}
 	res = new(Distribution)
-	if strings.HasPrefix(split[0], "zFNSc") && !strings.Contains(split[0], "/") && len(split) == 2 {
+	if len(split) == 2 && validAddr.MatchString(split[0]) {
 		res.Address, err = cells.DecodeCID(split[0])
 	} else {
 		res.WalletKeyPath, err = wallet.ParseKeyPath(split[0])

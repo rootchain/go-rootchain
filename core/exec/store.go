@@ -17,8 +17,7 @@ package exec
 import (
 	"errors"
 
-	mh "gx/ipfs/QmPnFwZ2JXKnXgMw8CdBPxn7FWh6LLdjUjxV1fKHuJnkr8/go-multihash"
-	cid "gx/ipfs/QmapdYm1b22Frv3k17fqrBYTFRxwiaVJkB299Mfn33edeB/go-cid"
+	"github.com/rootchain/go-rootchain/dev/contents"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/trie"
@@ -120,7 +119,7 @@ func (s *execStore) Commit() (_ *cells.CID, err error) {
 	if err != nil {
 		return
 	}
-	s.commit = cells.NewCIDFromHash(cid.EthStateTrie, commit[:], mh.KECCAK_256)
+	s.commit = cells.NewCIDFromHash(contents.StateTrie, commit[:], contents.StateTriePrefix.MhType)
 	return s.commit, nil
 }
 

@@ -20,12 +20,12 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	cells "github.com/ipfn/go-ipfn-cells"
 	wallet "github.com/ipfn/go-ipfn-wallet"
-	"github.com/rootchain/go-rootchain/chain"
+	"github.com/rootchain/go-rootchain/core/chain"
 	"github.com/rootchain/go-rootchain/dev/chainops"
 )
 
 // Init - Initializes a new chain.
-func Init(config *Config) (block *chain.Block, err error) {
+func Init(config *Config) (sealed *chain.SignedBlock, err error) {
 	// set default wallet if empty
 	if config.Wallet == nil {
 		config.Wallet = wallet.NewDefault()
@@ -36,36 +36,42 @@ func Init(config *Config) (block *chain.Block, err error) {
 		delegateOps []cells.Cell
 	)
 	// derive private keys for all key paths
-	for _, dest := range config.Power {
-		key, err := config.Wallet.UnlockedDerive(dest.WalletKeyPath)
-		if err != nil {
-			return nil, fmt.Errorf("wallet %s: %v", dest.WalletKeyPath.SeedName, err)
-		}
-		privKey, err := key.ECPrivKey()
-		if err != nil {
-			return nil, err
-		}
-		addr, err := key.CID()
-		if err != nil {
-			return nil, err
-		}
-		if dest.DelegateQuantity > 0 {
-			delegateOp := chainops.NewDelegatePowerOp(0, dest.DelegateQuantity)
-			signedOp, err := chainops.NewSignedOp(delegateOp, privKey)
+	for n, dest := range config.Power {
+		if dest.WalletKeyPath != nil {
+			key, err := config.Wallet.UnlockedDerive(dest.WalletKeyPath)
+			if err != nil {
+				return nil, fmt.Errorf("wallet %s: %v", dest.WalletKeyPath.SeedName, err)
+			}
+			privKey, err := key.ECPrivKey()
 			if err != nil {
 				return nil, err
 			}
-			privKeys = append(privKeys, privKey)
-			delegateOps = append(delegateOps, signedOp)
+			dest.Address, err = key.CID()
+			if err != nil {
+				return nil, err
+			}
+			if dest.DelegateQuantity > 0 {
+				delegateOp := chainops.NewDelegatePowerOp(0, dest.DelegateQuantity)
+				signedOp, err := chainops.NewSignedOp(delegateOp, privKey)
+				if err != nil {
+					return nil, err
+				}
+				privKeys = append(privKeys, privKey)
+				delegateOps = append(delegateOps, signedOp)
+			}
 		}
-		assignOps = append(assignOps, chainops.NewAssignPowerOp(0, dest.AssignQuantity, addr))
+		if dest.Address == nil {
+			err = fmt.Errorf("account %d has no address assigned", n)
+			return
+		}
+		assignOps = append(assignOps, chainops.NewAssignPowerOp(0, dest.AssignQuantity, dest.Address))
 	}
 	// chain exec root op
 	root := chainops.NewRootOp()
 	root.AddChildren(assignOps...)
 	root.AddChildren(delegateOps...)
 	// initialize block
-	block, err = chain.NewBlock(0, nil, root)
+	block, err := chain.NewBlock(0, nil, root)
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +82,11 @@ func Init(config *Config) (block *chain.Block, err error) {
 	}
 	// set block state hash
 	block.SetStateHash(state)
+	// create signed block
+	sealed = block.Seal()
 	// sign block with private keys
 	for _, key := range privKeys {
-		if _, err := block.Sign(key); err != nil {
+		if err := sealed.Sign(key); err != nil {
 			return nil, err
 		}
 	}
