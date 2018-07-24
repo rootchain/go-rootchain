@@ -18,7 +18,7 @@ import "github.com/ipfn/go-ipfn-cells"
 
 const (
 	// OpRoot - Offset of chain operation code (60).
-	OpRoot cells.ID = iota + 0x3c
+	OpRoot cells.ID = 0x3c
 
 	// OpMultihash - Multihash native operation code.
 	OpMultihash = OpRoot + 1
